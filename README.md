@@ -1,10 +1,10 @@
 # pyrtmp: Pure Python RTMP server    
   
-- [x] Pure python  
-- [x] AsyncIO with uvloop support  
-- [x] Easy to customize  
-- [x] RTMP(s)  
-- [x] RTMPT(s)  
+- Pure python  
+- AsyncIO with uvloop support  
+- Easy to customize  
+- Support RTMP(s)  
+- Support RTMPT(s)  
   
 ## Quickstart  
   
@@ -119,13 +119,16 @@ P.S. Pull requests are welcome!
 
   
 ## Roadmap  
-- [ ] Supported HTTP2/3  
-- [ ] RTMP over websocket  
-- [ ] Support AMF3  
-- [ ] ReStream  
-- [ ] HLS Playback  
-- [ ] Documentation  
+- Supported HTTP2/3  
+- RTMP over websocket  
+- Support AMF3  
+- ReStream  
+- HLS Playback  
+- Documentation  
   
 ## Changelog  
+- 0.1.3 Fix ReadMe
+- 0.1.2 Fix ReadMe
+- 0.1.1 Fix ReadMe
 - 0.1.0 Initial version
 
