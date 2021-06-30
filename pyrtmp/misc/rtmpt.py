@@ -1,23 +1,33 @@
 import asyncio
 import logging
 import uuid
-from asyncio import StreamReader, StreamWriter, events
+from asyncio import StreamReader, StreamWriter, events, BaseProtocol
 from io import BytesIO
 
 import quart
 from bitstring import BitArray, BitStream
+from quart import Quart, request
 
 from pyrtmp import BufferedWriteTransport
 from pyrtmp.rtmp import simple_controller
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+app = Quart(__name__)
 session = {}
 
-logging.basicConfig(level=logging.DEBUG)
-logging.getLogger().setLevel(logging.DEBUG)
-logger = logging.getLogger(__name__)
+
+class DummyProtocol(BaseProtocol):
+    async def _drain_helper(self):
+        pass
+
+    async def _get_close_waiter(self, stream: StreamWriter):
+        return asyncio.sleep(0)
 
 
-class RTMPWrapper:
+class RTMPTWrapper:
 
     def __init__(self,
                  session_id: str,
@@ -35,7 +45,7 @@ class RTMPWrapper:
             BufferedWriteTransport(self.stream, extra={
                 "peername": peer,
             }),
-            asyncio.StreamReaderProtocol(self.reader, self.loop),
+            DummyProtocol(),
             self.reader,
             self.loop)
         self.task = self.loop.create_task(self._dispatcher())
@@ -77,17 +87,12 @@ class RTMPWrapper:
         return buffer
 
 
-from quart import Quart, request
-
-app = Quart(__name__)
-
-
 @app.route('/open/<int:segment>', methods=['POST'])
 async def open(segment: int):
     # body = await request.body
     # assert body == b'\x00'
     sid = uuid.uuid4().hex
-    session[sid] = RTMPWrapper(
+    session[sid] = RTMPTWrapper(
         session_id=sid,
         peer=request.scope["client"],
         controller=simple_controller,

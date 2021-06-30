@@ -1,6 +1,5 @@
 import enum
 import logging
-from io import IOBase
 
 from bitstring import BitStream, BitArray
 
@@ -49,7 +48,7 @@ class FLVMediaType(int, enum.Enum):
     OBJECT = 18
 
 
-class FLVStream:
+class FLVFile:
 
     def __init__(self, filename: str) -> None:
         self.file = open(filename, 'wb')

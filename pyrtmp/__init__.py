@@ -1,9 +1,10 @@
 import asyncio
 import os
-from asyncio import StreamReader, StreamWriter, events, transports, BaseTransport, Transport, AbstractEventLoop, \
-    WriteTransport, Task
+from asyncio import StreamReader, StreamWriter, AbstractEventLoop, \
+    WriteTransport, Task, BaseTransport
 from io import BytesIO
-from typing import Any, Iterable, List, Optional, Mapping
+from typing import Any, List, Optional, Mapping
+
 from bitstring import tokenparser, BitStream
 
 
@@ -42,62 +43,6 @@ class FIFOStream:
         del self.buffer[:length]
         self.buffer.bitpos = 0
         return value
-
-
-class BufferedStreamWriter(StreamWriter):
-
-    def __init__(self,
-                 peer: str,
-                 reader: StreamReader,
-                 loop: events.AbstractEventLoop) -> None:
-        self.peer = peer
-        self.stream = BytesIO()
-        self.buffer = bytearray()
-        self.reader = reader
-        self.loop = loop
-        super().__init__(None, None, reader, loop)
-
-    @property
-    def transport(self) -> transports.BaseTransport:
-        raise NotImplementedError
-
-    def write(self, data: bytes) -> None:
-        self.buffer.extend(data)
-
-    def writelines(self, data: Iterable[bytes]) -> None:
-        raise NotImplementedError
-
-    def write_eof(self) -> None:
-        self.reader.feed_eof()
-
-    def can_write_eof(self) -> bool:
-        return False
-
-    def close(self) -> None:
-        assert len(self.buffer) == 0, 'Must be drained before close'
-        self.reader.feed_eof()
-        self.stream.close()
-
-    def is_closing(self) -> bool:
-        raise NotImplementedError
-
-    async def wait_closed(self) -> None:
-        raise NotImplementedError
-
-    def get_extra_info(self, name: str, default: Any = ...) -> Any:
-        if name == "peername":
-            return self.peer
-        raise NotImplementedError
-
-    async def drain(self) -> None:
-        self.stream.write(self.buffer)
-        self.buffer.clear()
-
-    async def get_buffered_data(self):
-        self.stream.seek(0)
-        buffer = self.stream.read()
-        self.stream.truncate(0)
-        return buffer
 
 
 class BufferedWriteTransport(WriteTransport):
@@ -141,6 +86,7 @@ class RTMPProtocol(asyncio.Protocol):
 
     def __init__(self, controller, loop: AbstractEventLoop) -> None:
         self.loop: AbstractEventLoop = loop
+        self.transport: BaseTransport = None
         self.reader: StreamReader = None
         self.writer: StreamWriter = None
         self.controller = controller
@@ -150,14 +96,19 @@ class RTMPProtocol(asyncio.Protocol):
     def connection_made(self, transport):
         self.reader = StreamReader(loop=self.loop)
         self.writer = StreamWriter(transport,
-                                   asyncio.StreamReaderProtocol(self.reader, loop=self.loop),
+                                   self,
                                    self.reader,
                                    self.loop)
         self.task = self.loop.create_task(self.controller(self.reader, self.writer))
 
     def connection_lost(self, exc):
         self.reader.feed_eof()
-        self.writer.close()
 
     def data_received(self, data):
         self.reader.feed_data(data)
+
+    async def _drain_helper(self):
+        pass
+
+    async def _get_close_waiter(self, stream: StreamWriter):
+        return self.task

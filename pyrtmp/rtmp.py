@@ -11,7 +11,7 @@ from pyrtmp.messages.data import MetaDataMessage
 from pyrtmp.messages.protocolcontrol import WindowAcknowledgementSize, SetChunkSize, SetPeerBandwidth
 from pyrtmp.messages.usercontrol import StreamBegin
 from pyrtmp.messages.video import VideoMessage
-from pyrtmp.misc.flvdump import FLVStream, FLVMediaType
+from pyrtmp.misc.flvdump import FLVFile, FLVMediaType
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ async def simple_controller(reader, writer):
                 logger.debug("Response to NCCreateStream")
             elif isinstance(message, NSPublish):
                 # create flv file at temp
-                flv = FLVStream(os.path.join(tempfile.gettempdir(), message.publishing_name))
+                flv = FLVFile(os.path.join(tempfile.gettempdir(), message.publishing_name))
                 session.write_chunk_to_stream(StreamBegin(stream_id=1))
                 session.write_chunk_to_stream(message.create_response())
                 await session.drain()
