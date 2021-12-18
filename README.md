@@ -124,11 +124,5 @@ P.S. Pull requests are welcome!
 - Support AMF3  
 - ReStream  
 - HLS Playback  
-- Documentation  
-  
-## Changelog  
-- 0.1.3 Fix ReadMe
-- 0.1.2 Fix ReadMe
-- 0.1.1 Fix ReadMe
-- 0.1.0 Initial version
+- Documentation
 
