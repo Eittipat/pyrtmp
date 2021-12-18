@@ -28,8 +28,7 @@ async def simple_controller(reader, writer):
         await session.handshake()
 
         # read chunks
-        while True:
-            chunk = await session.read_chunk_from_stream()
+        async for chunk in session.read_chunks_from_stream():
             message = chunk.as_message()
             logger.debug(f"Receiving {str(message)} {message.chunk_id}")
             if isinstance(message, NCConnect):

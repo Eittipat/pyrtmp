@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import logging
-from asyncio import StreamWriter, Transport
-from typing import Iterable
+from typing import Iterable, Generator
 
 from bitstring import BitStream, BitArray
 
@@ -33,6 +32,9 @@ class BaseChunk:
         self.msg_stream_id = msg_stream_id
         self.payload = payload
         super().__init__()
+
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}({self.chunk_id},{self.chunk_type},{self.timestamp},{self.msg_length},{self.msg_type_id},{self.msg_stream_id},{len(self.payload)})"
 
 
 class RawChunk(BaseChunk):
@@ -270,6 +272,49 @@ class SessionManager:
             msg_type_id=chunks[0].msg_type_id,
             msg_stream_id=chunks[0].msg_stream_id,
             payload=payload.bytes)
+
+    async def read_chunks_from_stream(self) -> Generator[Chunk]:
+        # stream contain many messages (full chunk)
+        chunks = {}
+
+        # process chunks
+        while True:
+            raw_chunk = await self.read_raw_chunk()
+            if raw_chunk.chunk_id not in chunks:
+                chunks[raw_chunk.chunk_id] = {
+                    "payload_size": raw_chunk.msg_length,
+                    "total_read": 0,
+                    "children": [],
+                }
+
+            chunks[raw_chunk.chunk_id]["total_read"] += len(raw_chunk.payload)
+            chunks[raw_chunk.chunk_id]["children"].append(raw_chunk)
+
+            # check if chunk complete?
+            if chunks[raw_chunk.chunk_id]["total_read"] == chunks[raw_chunk.chunk_id]["payload_size"]:
+                children = chunks[raw_chunk.chunk_id]["children"]
+                del chunks[raw_chunk.chunk_id]
+
+                # de-multiplex message stream id
+                msg_stream = {}
+                for child in children:
+                    if child.msg_stream_id not in msg_stream:
+                        msg_stream[child.msg_stream_id] = []
+                    msg_stream[child.msg_stream_id].append(child)
+
+                for chunk_id in msg_stream:
+                    msg_chunks = msg_stream[chunk_id]
+                    payload = BitStream()
+                    for ch in msg_chunks:
+                        payload.append(ch.payload)
+                    yield Chunk(
+                        chunk_id=msg_chunks[0].chunk_id,
+                        chunk_type=msg_chunks[0].chunk_type,
+                        timestamp=msg_chunks[0].timestamp,
+                        msg_length=msg_chunks[0].msg_length,
+                        msg_type_id=msg_chunks[0].msg_type_id,
+                        msg_stream_id=msg_chunks[0].msg_stream_id,
+                        payload=payload.bytes)
 
     async def read_raw_chunk(self) -> RawChunk:
         stream = self.fifo_reader

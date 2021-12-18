@@ -11,6 +11,7 @@
 You have to create your own rtmp controller to decide what to do when user connected or stream received.  The below example shows process to receive stream and write them to flv file using RTMP.
 
 If you are looking for RTMPT, please look inside [pyrtmp/misc/rtmpt.py](https://github.com/Eittipat/pyrtmp/blob/master/pyrtmp/misc/rtmpt.py)
+
 P.S. Pull requests are welcome!
 
 [*Simple RTMP controller*](https://github.com/Eittipat/pyrtmp/blob/master/pyrtmp/rtmp.py)
@@ -46,49 +47,48 @@ P.S. Pull requests are welcome!
             await session.handshake()  
       
             # read chunks  
-            while True:  
-                    chunk = await session.read_chunk_from_stream()  
-                    message = chunk.as_message()  
-                    logger.debug(f"Receiving {str(message)} {message.chunk_id}")  
-                    if isinstance(message, NCConnect):  
-                        session.write_chunk_to_stream(WindowAcknowledgementSize(ack_window_size=5000000))  
-                        session.write_chunk_to_stream(SetPeerBandwidth(ack_window_size=5000000, limit_type=2))  
-                        session.write_chunk_to_stream(StreamBegin(stream_id=0))  
-                        session.write_chunk_to_stream(SetChunkSize(chunk_size=8192))  
-                        session.writer_chunk_size = 8192  
-                        session.write_chunk_to_stream(message.create_response())  
-                        await session.drain()  
-                        logger.debug("Response to NCConnect")  
-                    elif isinstance(message, WindowAcknowledgementSize):  
-                        pass  
-                    elif isinstance(message, NCCreateStream):  
-                        session.write_chunk_to_stream(message.create_response())  
-                        await session.drain()  
-                        logger.debug("Response to NCCreateStream")  
-                    elif isinstance(message, NSPublish):  
-                        # create flv file at temp  
-                        flv = FLVStream(os.path.join(tempfile.gettempdir(), message.publishing_name))  
-                        session.write_chunk_to_stream(StreamBegin(stream_id=1))  
-                        session.write_chunk_to_stream(message.create_response())  
-                        await session.drain()  
-                        logger.debug("Response to NSPublish")  
-                    elif isinstance(message, MetaDataMessage):  
-                        # Write meta data to file  
-                        flv.write(0, message.to_raw_meta(), FLVMediaType.OBJECT)  
-                    elif isinstance(message, SetChunkSize):  
-                        session.reader_chunk_size = message.chunk_size  
-                    elif isinstance(message, VideoMessage):  
-                        # Write video data to file  
-                        flv.write(message.timestamp, message.payload, FLVMediaType.VIDEO)  
-                    elif isinstance(message, AudioMessage):  
-                        # Write data data to file  
-                        flv.write(message.timestamp, message.payload, FLVMediaType.AUDIO)  
-                    elif isinstance(message, NSCloseStream):  
-                        pass  
-                        elif isinstance(message, NSDeleteStream):  
-                        pass  
-                    else:  
-                        logger.debug(f"Unknown message {str(message)}")  
+            async for chunk in session.read_chunks_from_stream():
+                message = chunk.as_message()  
+                logger.debug(f"Receiving {str(message)} {message.chunk_id}")  
+                if isinstance(message, NCConnect):  
+                    session.write_chunk_to_stream(WindowAcknowledgementSize(ack_window_size=5000000))  
+                    session.write_chunk_to_stream(SetPeerBandwidth(ack_window_size=5000000, limit_type=2))  
+                    session.write_chunk_to_stream(StreamBegin(stream_id=0))  
+                    session.write_chunk_to_stream(SetChunkSize(chunk_size=8192))  
+                    session.writer_chunk_size = 8192  
+                    session.write_chunk_to_stream(message.create_response())  
+                    await session.drain()  
+                    logger.debug("Response to NCConnect")  
+                elif isinstance(message, WindowAcknowledgementSize):  
+                    pass  
+                elif isinstance(message, NCCreateStream):  
+                    session.write_chunk_to_stream(message.create_response())  
+                    await session.drain()  
+                    logger.debug("Response to NCCreateStream")  
+                elif isinstance(message, NSPublish):  
+                    # create flv file at temp  
+                    flv = FLVStream(os.path.join(tempfile.gettempdir(), message.publishing_name))  
+                    session.write_chunk_to_stream(StreamBegin(stream_id=1))  
+                    session.write_chunk_to_stream(message.create_response())  
+                    await session.drain()  
+                    logger.debug("Response to NSPublish")  
+                elif isinstance(message, MetaDataMessage):  
+                    # Write meta data to file  
+                    flv.write(0, message.to_raw_meta(), FLVMediaType.OBJECT)  
+                elif isinstance(message, SetChunkSize):  
+                    session.reader_chunk_size = message.chunk_size  
+                elif isinstance(message, VideoMessage):  
+                    # Write video data to file  
+                    flv.write(message.timestamp, message.payload, FLVMediaType.VIDEO)  
+                elif isinstance(message, AudioMessage):  
+                    # Write data data to file  
+                    flv.write(message.timestamp, message.payload, FLVMediaType.AUDIO)  
+                elif isinstance(message, NSCloseStream):  
+                    pass  
+                    elif isinstance(message, NSDeleteStream):  
+                    pass  
+                else:  
+                    logger.debug(f"Unknown message {str(message)}")  
       
         except StreamClosedException as ex:  
             logger.debug(f"Client {session.peername} disconnected!")  
