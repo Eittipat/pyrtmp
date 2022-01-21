@@ -85,7 +85,7 @@ P.S. Pull requests are welcome!
                     flv.write(message.timestamp, message.payload, FLVMediaType.AUDIO)  
                 elif isinstance(message, NSCloseStream):  
                     pass  
-                    elif isinstance(message, NSDeleteStream):  
+                elif isinstance(message, NSDeleteStream):  
                     pass  
                 else:  
                     logger.debug(f"Unknown message {str(message)}")  
