@@ -4,13 +4,13 @@ from setuptools import find_packages
 setup(
     name='pyrtmp',
     packages=find_packages(),
-    version='0.1.5',
+    version='0.2.0',
     license='MIT',
     description='Pure python RTMP server',
     author='Eittipat.K',
     author_email='iammop@gmail.com',
     url='https://github.com/Eittipat/pyrtmp.git',
-    download_url='https://github.com/Eittipat/pyrtmp/releases/tag/v0.1.5',
+    download_url='https://github.com/Eittipat/pyrtmp/releases/tag/v0.2.0',
     keywords=['RTMP', 'RTMPT', 'asyncio'],
     python_requires='>=3',
     install_requires=[
@@ -20,7 +20,7 @@ setup(
         'psutil>=5.8.0',
     ],
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: MIT License',
