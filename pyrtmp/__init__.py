@@ -5,7 +5,8 @@ from asyncio import StreamReader, StreamWriter, AbstractEventLoop, \
 from io import BytesIO
 from typing import Any, List, Optional, Mapping
 
-from bitstring import tokenparser, BitStream
+from bitstring import BitStream
+from bitstring.bitstream import tokenparser
 
 
 def random_byte_array(size: int) -> bytes:
