@@ -1,10 +1,7 @@
 import enum
-import logging
+from typing import BinaryIO
 
 from bitstring import BitStream, BitArray
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class FLVTag:
@@ -48,23 +45,22 @@ class FLVMediaType(int, enum.Enum):
     OBJECT = 18
 
 
-class FLVFile:
+class FLVWriter:
 
-    def __init__(self, filename: str) -> None:
-        self.file = open(filename, 'wb')
+    def __init__(self) -> None:
         self.prev_tag_size = 0
-        # write header
+        super().__init__()
+
+    def write_header(self) -> bytes:
         stream = BitStream()
         stream.append(b'FLV')
         stream.append(BitStream(uint=1, length=8))
         stream.append(BitStream(uint=5, length=8))
         stream.append(BitStream(uint=9, length=32))
         stream.append(BitStream(uint=self.prev_tag_size, length=32))
-        self.file.write(stream.bytes)
+        return stream.bytes
 
-        super().__init__()
-
-    def write(self, timestamp: int, payload: bytes, media_type: FLVMediaType):
+    def write(self, timestamp: int, payload: bytes, media_type: FLVMediaType) -> bytes:
         # preprocess
         payload_size = len(payload)
         self.prev_tag_size = 11 + payload_size
@@ -84,8 +80,20 @@ class FLVFile:
         stream.append(payload)
         # prev tag size
         stream.append(BitArray(uint=self.prev_tag_size, length=32))
-        self.file.write(stream.bytes)
-        self.file.flush()
+        return stream.bytes
+
+
+class FLVFileWriter:
+
+    def __init__(self, output: str) -> None:
+        self.buffer = open(output, 'wb')
+        self.writer = FLVWriter()
+        self.buffer.write(self.writer.write_header())
+        super().__init__()
+
+    def write(self, timestamp: int, payload: bytes, media_type: FLVMediaType):
+        self.buffer.write(self.writer.write(timestamp, payload, media_type))
+        self.buffer.flush()
 
     def close(self):
-        self.file.close()
+        self.buffer.close()

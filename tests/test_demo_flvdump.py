@@ -2,46 +2,20 @@ import asyncio
 import os
 import tempfile
 
-import psutil as psutil
 from aiounittest import AsyncTestCase
-
-from pyrtmp.rtmp import serve_rtmp
-
-
-async def invoke_command(command: str):
-    proc = None
-    try:
-        proc = await asyncio.subprocess.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE,
-                                                                stderr=asyncio.subprocess.PIPE)
-        stdout, stderr = await proc.communicate()
-        if proc.returncode > 0:
-            raise Exception("Non-zero returned")
-
-        return stdout, stderr
-    finally:
-        if proc and proc.returncode is None:
-            process = psutil.Process(proc.pid)
-            to_be_kill = [p for p in process.children(recursive=True)]
-            to_be_kill.append(process)
-            exception = None
-            for p in to_be_kill:
-                try:
-                    p.kill()
-                except Exception as ex:
-                    exception = ex
-            if exception:
-                raise exception
+from example.demo_flvdump import serve_rtmp
+from tests import invoke_command
 
 
-class TestRTMP(AsyncTestCase):
+class TestFLVDump(AsyncTestCase):
 
     async def test_single_rtmp(self):
         # given
         stream_name = "test_rtmp"
-        target = os.path.join(tempfile.gettempdir(), stream_name)
+        target = os.path.join(tempfile.gettempdir(), stream_name + ".flv")
         if os.path.exists(target):
             os.remove(target)
-        task0 = asyncio.create_task(serve_rtmp())
+        task0 = asyncio.create_task(serve_rtmp(tempfile.gettempdir()))
         task1 = invoke_command(
             f"ffmpeg -i SampleVideo_1280x720_5mb.flv -c:v copy -c:a copy -f flv rtmp://127.0.0.1:1935/test/{stream_name}")
 
@@ -59,11 +33,11 @@ class TestRTMP(AsyncTestCase):
 
     async def test_multiple_rtmp(self):
         # given
-        task0 = asyncio.create_task(serve_rtmp())
+        task0 = asyncio.create_task(serve_rtmp(tempfile.gettempdir()))
         tasks = []
         for i in range(3):
             stream_name = f"test_rtmp_{i}"
-            target = os.path.join(tempfile.gettempdir(), stream_name)
+            target = os.path.join(tempfile.gettempdir(), stream_name + ".flv")
             if os.path.exists(target):
                 os.remove(target)
             tasks.append(invoke_command(
@@ -80,6 +54,6 @@ class TestRTMP(AsyncTestCase):
         # check flv
         for i in range(3):
             stream_name = f"test_rtmp_{i}"
-            target = os.path.join(tempfile.gettempdir(), stream_name)
+            target = os.path.join(tempfile.gettempdir(), stream_name + ".flv")
             stdout, stderr = await invoke_command(f"ffprobe -i {target} -show_format | grep duration")
             self.assertEqual(stdout.decode().startswith("duration=26"), True)

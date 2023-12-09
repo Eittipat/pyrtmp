@@ -11,4 +11,3 @@ class AudioMessage(Chunk):
         instance.control = data.read('bytes:1')
         instance.data = data.read(f'bytes:{instance.msg_length - 1}')
         return instance
-

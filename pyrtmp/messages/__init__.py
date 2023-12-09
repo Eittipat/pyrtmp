@@ -212,6 +212,7 @@ class SessionManager:
         self.latest_chunks = {}
         self.fifo_reader = FIFOStream(self.reader)
         self.previous_chunk_for_writing: RawChunk = None
+        self.state = {}
         super().__init__()
 
     @property
@@ -246,32 +247,6 @@ class SessionManager:
         await self.writer.drain()
         await C2.from_stream(self.fifo_reader)
         logger.info("Handshake!")
-
-    # async def read_chunk_from_stream(self) -> Chunk:
-    #     chunks = []
-    #     first_chunk = await self.read_raw_chunk()
-    #     payload_size = first_chunk.msg_length
-    #     total_read = len(first_chunk.payload)
-    #     payload = BitStream(first_chunk.payload)
-    #     while payload_size > total_read:
-    #         chunk = await self.read_raw_chunk()
-    #         assert first_chunk.chunk_id == chunk.chunk_id
-    #         assert first_chunk.msg_stream_id == chunk.msg_stream_id
-    #         assert first_chunk.msg_length == chunk.msg_length
-    #         total_read += len(chunk.payload)
-    #         payload.append(chunk.payload)
-    #         chunks.append(chunk)
-    #     chunks.insert(0, first_chunk)
-    #
-    #     # create Chunk from RawChunk
-    #     return Chunk(
-    #         chunk_id=chunks[0].chunk_id,
-    #         chunk_type=chunks[0].chunk_type,
-    #         timestamp=chunks[0].timestamp,
-    #         msg_length=chunks[0].msg_length,
-    #         msg_type_id=chunks[0].msg_type_id,
-    #         msg_stream_id=chunks[0].msg_stream_id,
-    #         payload=payload.bytes)
 
     async def read_chunks_from_stream(self) -> Generator[Chunk]:
         # stream contain many messages (full chunk)

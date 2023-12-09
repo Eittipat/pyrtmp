@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import uuid
 from asyncio import StreamReader, StreamWriter, events, BaseProtocol
 from io import BytesIO
@@ -8,8 +9,9 @@ import quart
 from bitstring import BitArray, BitStream
 from quart import Quart, request
 
+from example.demo_flvdump import RTMP2FLVController
 from pyrtmp import BufferedWriteTransport
-from pyrtmp.rtmp import simple_controller
+from pyrtmp.rtmp import BaseRTMPController
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -17,9 +19,11 @@ logger.setLevel(logging.DEBUG)
 
 app = Quart(__name__)
 session = {}
+config = {}
 
 
 class DummyProtocol(BaseProtocol):
+
     async def _drain_helper(self):
         pass
 
@@ -32,13 +36,13 @@ class RTMPTWrapper:
     def __init__(self,
                  session_id: str,
                  peer: tuple,
-                 controller,
+                 controller: BaseRTMPController,
                  loop: events.AbstractEventLoop) -> None:
         self.delay = 0
         self.loop = loop
         self.session_id = session_id
         self.peer = peer
-        self.controller = controller
+        self.controller = controller.client_callback
         self.stream = BytesIO()
         self.reader = StreamReader(loop=self.loop)
         self.writer = StreamWriter(
@@ -95,7 +99,7 @@ async def open(segment: int):
     session[sid] = RTMPTWrapper(
         session_id=sid,
         peer=request.scope["client"],
-        controller=simple_controller,
+        controller=config["controller"],
         loop=asyncio.get_running_loop())
     resp = quart.Response(sid)
     resp.headers['Content-Type'] = 'application/x-fcs'
@@ -137,9 +141,11 @@ async def close(sid: str, segment: int):
     return resp
 
 
-async def serve_rtmpt():
+async def serve_rtmpt(output_directory: str):
+    config["controller"] = RTMP2FLVController(output_directory)
     await app.run_task()
 
 
 if __name__ == "__main__":
-    asyncio.run(serve_rtmpt())
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    asyncio.run(serve_rtmpt(current_dir))
