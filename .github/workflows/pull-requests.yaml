@@ -3,11 +3,11 @@ name: CI/CD when pull-request or merge to main branch
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     types: [ opened, reopened, synchronize ]
     branches:
-      - main
+      - master
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
