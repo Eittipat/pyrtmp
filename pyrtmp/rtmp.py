@@ -163,7 +163,7 @@ class SimpleRTMPController(BaseRTMPController):
         pass
 
     async def cleanup(self, session: SessionManager) -> None:
-        logger.debug(f'Cleanup {session.peername}')
+        logger.debug(f'Clean up {session.peername}')
 
 
 class RTMPProtocol(asyncio.StreamReaderProtocol):
