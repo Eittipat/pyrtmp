@@ -47,9 +47,6 @@ class TestFFMPEG(unittest.IsolatedAsyncioTestCase):
             await server.create(host='127.0.0.1', port=1935)
             await server.start()
 
-            # wait for server to start
-            await asyncio.sleep(3)
-
             tasks = []
             for i in range(3):
                 stream_name = f"test_ffmpeg_{i}"

@@ -36,9 +36,6 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
             await server.stop()
             await server.wait_closed()
 
-            # wait for server to stop
-            await asyncio.sleep(3)
-
             # check flv
             stdout, stderr = await invoke_command(f"ffprobe -i {target} -show_format | grep duration")
             self.assertEqual(stdout.decode().startswith("duration=26"), True)

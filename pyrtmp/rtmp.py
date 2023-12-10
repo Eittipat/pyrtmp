@@ -77,7 +77,7 @@ class SimpleRTMPController(BaseRTMPController):
         try:
             # do handshake
             await self.on_handshake(session)
-            logger.debug(f"Handshake! {session.peername}")
+            # logger.debug(f"Handshake! {session.peername}")
 
             # read chunks
             async for chunk in session.read_chunks_from_stream():
