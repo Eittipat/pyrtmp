@@ -19,7 +19,7 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             # given
             command = "ffmpeg -i SampleVideo_1280x720_5mb.flv -c:v copy -c:a copy -f flv {}"
-            stream_name = "test_rtmp"
+            stream_name = "test_flvdump"
             target = os.path.join(tempdir, stream_name + ".flv")
             remove_if_exist(target)
 
@@ -51,7 +51,7 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
             tasks = []
             for i in range(3):
                 command = "ffmpeg -i SampleVideo_1280x720_5mb.flv -c:v copy -c:a copy -f flv {}"
-                stream_name = f"test_rtmp_{i}"
+                stream_name = f"test_flvdump_{i}"
                 target = os.path.join(tempdir, stream_name + ".flv")
                 remove_if_exist(target)
                 tasks.append(invoke_command(command.format(f"rtmp://127.0.0.1:1935/test/{stream_name}")))
@@ -66,7 +66,7 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
 
             # check flv
             for i in range(3):
-                stream_name = f"test_rtmp_{i}"
-                target = os.path.join(tempfile.gettempdir(), stream_name + ".flv")
+                stream_name = f"test_flvdump_{i}"
+                target = os.path.join(tempdir, stream_name + ".flv")
                 stdout, stderr = await invoke_command(f"ffprobe -i {target} -show_format | grep duration")
                 self.assertEqual(stdout.decode().startswith("duration=26"), True)
