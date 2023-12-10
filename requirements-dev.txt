@@ -2,3 +2,5 @@ Quart>=0.19
 psutil>=5.9.6
 quart>=0.19.4
 pytest>=7.4.3
+coverage-badge
+coverage
