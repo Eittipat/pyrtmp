@@ -31,6 +31,7 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
 
             # when
             await task1
+            await asyncio.sleep(3)
 
             # then
             await server.stop()
@@ -57,6 +58,7 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
 
             # when
             await asyncio.gather(*tasks)
+            await asyncio.sleep(5)
 
             # then
             await server.stop()
