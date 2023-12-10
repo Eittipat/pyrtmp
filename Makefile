@@ -11,4 +11,9 @@ coverage:
 	@mv tests/.coverage ./.coverage
 	@coverage-badge -o coverage.svg -f
 
-
+publish:
+	@rm -rf dist
+	@rm -rf pyrtmp.egg-info
+	@python setup.py sdist
+	@twine check dist/*
+	@twine upload dist/*
