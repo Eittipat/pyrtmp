@@ -4,7 +4,7 @@ install:
 	@pip install -r requirements-dev.txt
 
 unittest:
-	@cd tests && pytest ./tests --no-header
+	@cd tests && pytest ./ --no-header
 
 coverage:
 	@cd tests && coverage run -m pytest ./ --no-header
