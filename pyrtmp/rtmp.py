@@ -77,12 +77,12 @@ class SimpleRTMPController(BaseRTMPController):
         try:
             # do handshake
             await self.on_handshake(session)
-            # logger.debug(f"Handshake! {session.peername}")
+            logger.debug(f"Handshake! {session.peername}")
 
             # read chunks
             async for chunk in session.read_chunks_from_stream():
                 message = MessageFactory.from_chunk(chunk)
-                logger.debug(f"Receiving {str(message)} {message.chunk_id}")
+                # logger.debug(f"Receiving {str(message)} {message.chunk_id}")
                 if isinstance(message, NCConnect):
                     await self.on_nc_connect(session, message)
                 elif isinstance(message, WindowAcknowledgementSize):
