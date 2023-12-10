@@ -32,8 +32,13 @@ If you have any problems. Feel free to create issue on [GitHub](https://github.c
 
 ## Installation
 
+Install from PyPI:
 ```
 pip install pyrtmp
+```
+Install from source:
+```
+pip install pyrtmp@git+https://github.com/Eittipat/pyrtmp.git
 ```
 
 ## Quickstart
