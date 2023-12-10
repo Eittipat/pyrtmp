@@ -5,7 +5,7 @@ import logging
 from pyrtmp import StreamClosedException
 from pyrtmp.flv import FLVFileWriter, FLVMediaType
 from pyrtmp.session_manager import SessionManager
-from pyrtmp.rtmp import SimpleRTMPController, RTMPProtocol
+from pyrtmp.rtmp import SimpleRTMPController, RTMPProtocol, SimpleRTMPServer
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -41,20 +41,28 @@ class RTMP2FLVController(SimpleRTMPController):
         await super().on_stream_closed(session, exception)
 
 
-async def serve_rtmp(output_directory: str):
-    loop = asyncio.get_event_loop()
-    server = await loop.create_server(
-        lambda: RTMPProtocol(controller=RTMP2FLVController(output_directory)),
-        host='0.0.0.0',
-        port=1935
-    )
-    addr = server.sockets[0].getsockname()
-    logger.info(f'FLV output to {output_directory}')
-    logger.info(f'Serving on {addr}')
-    async with server:
-        await server.serve_forever()
+class SimpleServer(SimpleRTMPServer):
+
+    def __init__(self, output_directory: str):
+        self.output_directory = output_directory
+        super().__init__()
+
+    async def create(self, host: str, port: int):
+        loop = asyncio.get_event_loop()
+        self.server = await loop.create_server(
+            lambda: RTMPProtocol(controller=RTMP2FLVController(self.output_directory)),
+            host=host,
+            port=port,
+        )
+
+
+async def main():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    server = SimpleServer(output_directory=current_dir)
+    await server.create(host='0.0.0.0', port=1935)
+    await server.start()
+    await server.wait_closed()
 
 
 if __name__ == "__main__":
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    asyncio.run(serve_rtmp(current_dir))
+    asyncio.run(main())

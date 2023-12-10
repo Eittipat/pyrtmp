@@ -178,18 +178,49 @@ class RTMPProtocol(asyncio.StreamReaderProtocol):
         )
 
 
-async def serve_rtmp():
-    loop = asyncio.get_event_loop()
-    server = await loop.create_server(
-        lambda: RTMPProtocol(controller=SimpleRTMPController()),
-        host='0.0.0.0',
-        port=1935
-    )
-    addr = server.sockets[0].getsockname()
-    logger.info(f'Serving on {addr}')
-    async with server:
-        await server.serve_forever()
+class SimpleRTMPServer:
+
+    def __init__(self):
+        self.server = None
+        self.on_start = None
+        self.on_stop = None
+
+    def _signal_on_start(self):
+        if self.on_start:
+            self.on_start()
+
+    def _signal_on_stop(self):
+        if self.on_stop:
+            self.on_stop()
+
+    async def create(self, host: str, port: int):
+        loop = asyncio.get_event_loop()
+        self.server = await loop.create_server(
+            lambda: RTMPProtocol(controller=SimpleRTMPController()),
+            host=host,
+            port=port,
+        )
+
+    async def start(self):
+        addr = self.server.sockets[0].getsockname()
+        await self.server.start_serving()
+        self._signal_on_start()
+        logger.info(f'Serving on {addr}')
+
+    async def wait_closed(self):
+        await self.server.wait_closed()
+
+    async def stop(self):
+        self.server.close()
+        self._signal_on_stop()
+
+
+async def main():
+    server = SimpleRTMPServer()
+    await server.create(host='0.0.0.0', port=1935)
+    await server.start()
+    await server.wait_closed()
 
 
 if __name__ == "__main__":
-    asyncio.run(serve_rtmp())
+    asyncio.run(main())

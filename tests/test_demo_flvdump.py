@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest
 
-from example.demo_flvdump import serve_rtmp
+from example.demo_flvdump import SimpleServer
 from tests import invoke_command, remove_if_exist
 
 
@@ -22,10 +22,10 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
             stream_name = "test_rtmp"
             target = os.path.join(tempdir, stream_name + ".flv")
             remove_if_exist(target)
-            task0 = asyncio.create_task(serve_rtmp(tempdir))
 
-            # wait for server to start
-            await asyncio.sleep(3)
+            server = SimpleServer(tempdir)
+            await server.create(host='127.0.0.1', port=1935)
+            await server.start()
 
             task1 = invoke_command(command.format(f"rtmp://127.0.0.1:1935/test/{stream_name}"))
 
@@ -33,9 +33,8 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
             await task1
 
             # then
-            task0.cancel()
-            while not task0.cancelled():
-                await asyncio.sleep(1)
+            await server.stop()
+            await server.wait_closed()
 
             # wait for server to stop
             await asyncio.sleep(3)
@@ -47,10 +46,9 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
     async def test_multiple_rtmp(self):
         with tempfile.TemporaryDirectory() as tempdir:
             # given
-            task0 = asyncio.create_task(serve_rtmp(tempdir))
-
-            # wait for server to start
-            await asyncio.sleep(3)
+            server = SimpleServer(tempdir)
+            await server.create(host='127.0.0.1', port=1935)
+            await server.start()
 
             tasks = []
             for i in range(3):
@@ -64,12 +62,8 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
             await asyncio.gather(*tasks)
 
             # then
-            task0.cancel()
-            while not task0.cancelled():
-                await asyncio.sleep(1)
-
-            # wait for server to stop
-            await asyncio.sleep(3)
+            await server.stop()
+            await server.wait_closed()
 
             # check flv
             for i in range(3):
