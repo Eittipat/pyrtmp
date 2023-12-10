@@ -37,6 +37,9 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
             while not task0.cancelled():
                 await asyncio.sleep(1)
 
+            # wait for server to stop
+            await asyncio.sleep(3)
+
             # check flv
             stdout, stderr = await invoke_command(f"ffprobe -i {target} -show_format | grep duration")
             self.assertEqual(stdout.decode().startswith("duration=26"), True)
@@ -64,6 +67,9 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
             task0.cancel()
             while not task0.cancelled():
                 await asyncio.sleep(1)
+
+            # wait for server to stop
+            await asyncio.sleep(3)
 
             # check flv
             for i in range(3):
