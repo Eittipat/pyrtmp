@@ -4,7 +4,7 @@ import logging
 
 from pyrtmp import StreamClosedException
 from pyrtmp.flv import FLVFileWriter, FLVMediaType
-from pyrtmp.messages import SessionManager
+from pyrtmp.session_manager import SessionManager
 from pyrtmp.rtmp import SimpleRTMPController, RTMPProtocol
 
 logging.basicConfig(level=logging.DEBUG)

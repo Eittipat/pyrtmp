@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 
 from bitstring import BitStream
@@ -11,6 +13,10 @@ logger.setLevel(logging.DEBUG)
 
 class CommandMessage(Chunk):
 
+    def __init__(self, command_name: str, **kwargs):
+        super().__init__(**kwargs)
+        self.command_name = command_name
+
     @classmethod
     def from_chunk(cls, chunk: Chunk):
         data = BitStream(chunk.payload)
@@ -21,8 +27,10 @@ class CommandMessage(Chunk):
             return NetStreamCommand.from_chunk(chunk)
 
         logger.warning(f"Unknown CommandMessage '{signature}', use default parser")
-        instance = cls(**chunk.__dict__)
-        instance.command_name = signature
+        instance = cls(
+            command_name=signature,
+            **chunk.__dict__,
+        )
         return instance
 
 
@@ -44,25 +52,44 @@ class NetConnectionCommand(CommandMessage):
             return NCCreateStream.from_chunk(chunk)
 
         logger.warning(f"Unknown NetConnectionCommand '{signature}', use default parser")
-        instance = cls(**chunk.__dict__)
-        instance.command_name = signature
+        instance = cls(
+            command_name=signature,
+            **chunk.__dict__,
+        )
         return instance
 
 
 class NCConnect(NetConnectionCommand):
 
+    def __init__(
+            self,
+            transaction_id: int,
+            command_object: dict,
+            optional_user_arguments: dict | None,
+            **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.transaction_id = transaction_id
+        self.command_object = command_object
+        self.optional_user_arguments = optional_user_arguments
+
     @classmethod
     def from_chunk(cls, chunk: Chunk):
-        instance = cls(**chunk.__dict__)
-        data = BitStream(instance.payload)
-        instance.command_name = AMF0Deserializer.from_stream(data)
-        instance.transaction_id = AMF0Deserializer.from_stream(data)
-        instance.command_object = AMF0Deserializer.from_stream(data)
+        data = BitStream(chunk.payload)
+        command_name = AMF0Deserializer.from_stream(data)
+        transaction_id = AMF0Deserializer.from_stream(data)
+        command_object = AMF0Deserializer.from_stream(data)
         if data.bytepos - len(data.bytes) > 0:
-            instance.optional_user_arguments = AMF0Deserializer.from_stream(data)
+            optional_user_arguments = AMF0Deserializer.from_stream(data)
         else:
-            instance.optional_user_arguments = None
-        return instance
+            optional_user_arguments = None
+        return cls(
+            command_name=command_name,
+            transaction_id=transaction_id,
+            command_object=command_object,
+            optional_user_arguments=optional_user_arguments,
+            **chunk.__dict__,
+        )
 
     def create_response(self) -> Chunk:
         data = BitStream()
@@ -88,7 +115,8 @@ class NCConnect(NetConnectionCommand):
             msg_length=len(data.bytes),
             msg_type_id=0x14,
             msg_stream_id=0,
-            payload=data.bytes)
+            payload=data.bytes,
+        )
 
 
 class NCCall(NetConnectionCommand):
@@ -101,14 +129,23 @@ class NCClose(NetConnectionCommand):
 
 class NCCreateStream(NetConnectionCommand):
 
+    def __init__(self, transaction_id: int, command_object: dict, **kwargs):
+        super().__init__(**kwargs)
+        self.transaction_id = transaction_id
+        self.command_object = command_object
+
     @classmethod
     def from_chunk(cls, chunk: Chunk):
-        instance = cls(**chunk.__dict__)
-        data = BitStream(instance.payload)
-        instance.command_name = AMF0Deserializer.from_stream(data)
-        instance.transaction_id = AMF0Deserializer.from_stream(data)
-        instance.command_object = AMF0Deserializer.from_stream(data)
-        return instance
+        data = BitStream(chunk.payload)
+        command_name = AMF0Deserializer.from_stream(data)
+        transaction_id = AMF0Deserializer.from_stream(data)
+        command_object = AMF0Deserializer.from_stream(data)
+        return cls(
+            command_name=command_name,
+            transaction_id=transaction_id,
+            command_object=command_object,
+            **chunk.__dict__,
+        )
 
     def create_response(self) -> Chunk:
         data = BitStream()
@@ -126,7 +163,8 @@ class NCCreateStream(NetConnectionCommand):
             msg_length=len(data.bytes),
             msg_type_id=0x14,
             msg_stream_id=0,
-            payload=data.bytes)
+            payload=data.bytes,
+        )
 
 
 class NetStreamCommand(CommandMessage):
@@ -155,9 +193,10 @@ class NetStreamCommand(CommandMessage):
             return NSDeleteStream.from_chunk(chunk)
 
         logger.warning(f"Unknown NetStreamCommand '{signature}', use default parser")
-        instance = cls(**chunk.__dict__)
-        instance.command_name = signature
-        return instance
+        return cls(
+            command_name=signature,
+            **chunk.__dict__,
+        )
 
 
 class NSPlay(NetConnectionCommand):
@@ -170,27 +209,58 @@ class NSPlay2(NetConnectionCommand):
 
 class NSDeleteStream(NetConnectionCommand):
 
+    def __init__(
+            self,
+            stream_id: int,
+            transaction_id: int,
+            command_object: dict,
+            **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.stream_id = stream_id
+        self.transaction_id = transaction_id
+        self.command_object = command_object
+
     @classmethod
     def from_chunk(cls, chunk: Chunk):
-        instance = cls(**chunk.__dict__)
-        data = BitStream(instance.payload)
-        instance.command_name = AMF0Deserializer.from_stream(data)
-        instance.transaction_id = AMF0Deserializer.from_stream(data)
-        instance.command_object = AMF0Deserializer.from_stream(data)
-        instance.stream_id = AMF0Deserializer.from_stream(data)
-        return instance
+        data = BitStream(chunk.payload)
+        command_name = AMF0Deserializer.from_stream(data)
+        transaction_id = AMF0Deserializer.from_stream(data)
+        command_object = AMF0Deserializer.from_stream(data)
+        stream_id = AMF0Deserializer.from_stream(data)
+        return cls(
+            command_name=command_name,
+            transaction_id=transaction_id,
+            command_object=command_object,
+            stream_id=stream_id,
+            **chunk.__dict__,
+        )
 
 
 class NSCloseStream(NetConnectionCommand):
 
+    def __init__(
+            self,
+            transaction_id: int,
+            command_object: dict,
+            **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.transaction_id = transaction_id
+        self.command_object = command_object
+
     @classmethod
     def from_chunk(cls, chunk: Chunk):
-        instance = cls(**chunk.__dict__)
-        data = BitStream(instance.payload)
-        instance.command_name = AMF0Deserializer.from_stream(data)
-        instance.transaction_id = AMF0Deserializer.from_stream(data)
-        instance.command_object = AMF0Deserializer.from_stream(data)
-        return instance
+        data = BitStream(chunk.payload)
+        command_name = AMF0Deserializer.from_stream(data)
+        transaction_id = AMF0Deserializer.from_stream(data)
+        command_object = AMF0Deserializer.from_stream(data)
+        return cls(
+            command_name=command_name,
+            transaction_id=transaction_id,
+            command_object=command_object,
+            **chunk.__dict__,
+        )
 
 
 class NSReceiveAudio(NetConnectionCommand):
@@ -203,16 +273,36 @@ class NSReceiveVideo(NetConnectionCommand):
 
 class NSPublish(NetConnectionCommand):
 
+    def __init__(
+            self,
+            transaction_id: int,
+            command_object: dict,
+            publishing_name: str,
+            publishing_type: str,
+            **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.transaction_id = transaction_id
+        self.command_object = command_object
+        self.publishing_name = publishing_name
+        self.publishing_type = publishing_type
+
     @classmethod
     def from_chunk(cls, chunk: Chunk):
-        instance = cls(**chunk.__dict__)
-        data = BitStream(instance.payload)
-        instance.command_name = AMF0Deserializer.from_stream(data)
-        instance.transaction_id = AMF0Deserializer.from_stream(data)
-        instance.command_object = AMF0Deserializer.from_stream(data)
-        instance.publishing_name = AMF0Deserializer.from_stream(data)
-        instance.publishing_type = AMF0Deserializer.from_stream(data)
-        return instance
+        data = BitStream(chunk.payload)
+        command_name = AMF0Deserializer.from_stream(data)
+        transaction_id = AMF0Deserializer.from_stream(data)
+        command_object = AMF0Deserializer.from_stream(data)
+        publishing_name = AMF0Deserializer.from_stream(data)
+        publishing_type = AMF0Deserializer.from_stream(data)
+        return cls(
+            command_name=command_name,
+            transaction_id=transaction_id,
+            command_object=command_object,
+            publishing_name=publishing_name,
+            publishing_type=publishing_type,
+            **chunk.__dict__,
+        )
 
     def create_response(self) -> Chunk:
         data = BitStream()
@@ -234,7 +324,8 @@ class NSPublish(NetConnectionCommand):
             msg_length=len(data.bytes),
             msg_type_id=0x14,
             msg_stream_id=self.msg_stream_id,
-            payload=data.bytes)
+            payload=data.bytes,
+        )
 
 
 class NSSeek(NetConnectionCommand):

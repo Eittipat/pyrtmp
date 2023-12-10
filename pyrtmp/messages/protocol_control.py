@@ -1,5 +1,4 @@
 from bitstring import BitStream, BitArray
-
 from pyrtmp.messages import Chunk
 
 
@@ -8,9 +7,8 @@ class ProtocolControlMessage(Chunk):
 
 
 class SetChunkSize(ProtocolControlMessage):
-    chunk_size: int
 
-    def __init__(self, chunk_size: int) -> bytes:
+    def __init__(self, chunk_size: int):
         assert 1 <= chunk_size <= 2147483647
         payload = BitStream()
         payload.append(BitArray(uint=chunk_size, length=32))
@@ -33,9 +31,8 @@ class SetChunkSize(ProtocolControlMessage):
 
 
 class AbortMessage(ProtocolControlMessage):
-    chunk_stream_id: int
 
-    def __init__(self, chunk_stream_id: int) -> bytes:
+    def __init__(self, chunk_stream_id: int):
         payload = BitStream()
         payload.append(BitArray(uint=chunk_stream_id, length=32))
         super().__init__(
@@ -49,11 +46,16 @@ class AbortMessage(ProtocolControlMessage):
         )
         self.chunk_stream_id = chunk_stream_id
 
+    @classmethod
+    def from_chunk(cls, chunk: Chunk):
+        data = BitStream(chunk.payload)
+        instance = cls(chunk_stream_id=data.read('uint:32'))
+        return instance
+
 
 class Acknowledgement(ProtocolControlMessage):
-    seq_number: int
 
-    def __init__(self, seq_number: int) -> bytes:
+    def __init__(self, seq_number: int):
         payload = BitStream()
         payload.append(BitArray(uint=seq_number, length=32))
         super().__init__(
@@ -67,9 +69,14 @@ class Acknowledgement(ProtocolControlMessage):
         )
         self.seq_number = seq_number
 
+    @classmethod
+    def from_chunk(cls, chunk: Chunk):
+        data = BitStream(chunk.payload)
+        instance = cls(seq_number=data.read('uint:32'))
+        return instance
+
 
 class WindowAcknowledgementSize(ProtocolControlMessage):
-    ack_window_size: int
 
     def __init__(self, ack_window_size: int):
         payload = BitStream()
@@ -92,8 +99,6 @@ class WindowAcknowledgementSize(ProtocolControlMessage):
 
 
 class SetPeerBandwidth(ProtocolControlMessage):
-    ack_window_size: int
-    limit_type: int
 
     def __init__(self, ack_window_size: int, limit_type: int):
         payload = BitStream()
@@ -110,3 +115,12 @@ class SetPeerBandwidth(ProtocolControlMessage):
         )
         self.ack_window_size = ack_window_size
         self.limit_type = limit_type
+
+    @classmethod
+    def from_chunk(cls, chunk: Chunk):
+        data = BitStream(chunk.payload)
+        instance = cls(
+            ack_window_size=data.read('uint:32'),
+            limit_type=data.read('uint:8'),
+        )
+        return instance

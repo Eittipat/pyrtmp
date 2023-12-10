@@ -22,42 +22,52 @@ class AMF0Serializer:
         elif isinstance(value, List):
             cls.write_array_object(data, value)
         elif value is None:
-            cls.write_null_object(data, value)
+            cls.write_null_object(data)
         else:
             raise NotImplementedError
 
     @classmethod
     def write_boolean_object(cls, data: BitStream, value: bool):
+        pos = data.pos
         data.append(BitArray(uint=AMF0.BOOLEAN, length=8))
         data.append(BitArray(uint=0 if value is False else 1, length=8))
+        data.pos = pos
 
     @classmethod
     def write_string_object(cls, data: BitStream, value: str):
+        pos = data.pos
         data.append(BitArray(uint=AMF0.STRING, length=8))
         data.append(BitArray(uint=len(value), length=16))
         data.append(BitArray(bytes=value.encode(), length=len(value) * 8))
+        data.pos = pos
 
     @classmethod
     def write_number_object(cls, data: BitStream, value: float):
+        pos = data.pos
         data.append(BitArray(uint=AMF0.NUMBER, length=8))
         data.append(BitArray(float=value, length=64))
+        data.pos = pos
 
     @classmethod
-    def write_null_object(cls, data: BitStream, value: Any):
+    def write_null_object(cls, data: BitStream):
+        pos = data.pos
         data.append(BitArray(uint=AMF0.NULL, length=8))
-        assert value is None
+        data.pos = pos
 
     @classmethod
     def write_object_object(cls, data: BitStream, value: Dict):
+        pos = data.pos
         data.append(BitArray(uint=AMF0.OBJECT, length=8))
         for k, v in value.items():
             data.append(BitArray(uint=len(k), length=16))
             data.append(BitArray(bytes=k.encode(), length=len(k) * 8))
             cls.create_object(data, v)
         data.append(BitArray(uint=AMF0.OBJECT_END, length=24))
+        data.pos = pos
 
     @classmethod
     def write_array_object(cls, data: BitStream, value: List):
+        pos = data.pos
         data.append(BitArray(uint=AMF0.ARRAY, length=8))
         data.append(BitArray(uint=len(value), length=32))
         for item in value:
@@ -67,6 +77,7 @@ class AMF0Serializer:
                 data.append(BitArray(bytes=property_key, length=len(property_key) * 8))
                 cls.create_object(data, item[key])
         data.append(BitArray(uint=AMF0.OBJECT_END, length=24))
+        data.pos = pos
 
 
 class AMF0Deserializer:

@@ -6,7 +6,7 @@ from asyncio import StreamReader
 
 from pyrtmp import StreamClosedException
 from pyrtmp.flv import FLVMediaType, FLVWriter
-from pyrtmp.messages import SessionManager
+from pyrtmp.session_manager import SessionManager
 from pyrtmp.rtmp import SimpleRTMPController, RTMPProtocol
 
 logging.basicConfig(level=logging.DEBUG)
@@ -48,10 +48,6 @@ class RTMP2SocketController(SimpleRTMPController):
     async def on_stream_closed(self, session: SessionManager, exception: StreamClosedException) -> None:
         await session.state.close()
         await super().on_stream_closed(session, exception)
-
-    async def cleanup(self, session: SessionManager) -> None:
-        logger.debug("Clean up")
-        await super().cleanup(session)
 
 
 class RemoteProcessFLVWriter:

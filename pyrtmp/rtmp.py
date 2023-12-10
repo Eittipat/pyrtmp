@@ -4,13 +4,15 @@ import asyncio
 import logging
 from asyncio import StreamReader, StreamWriter, events
 from pyrtmp import StreamClosedException
-from pyrtmp.messages import SessionManager, Chunk
+from pyrtmp.messages import Chunk
 from pyrtmp.messages.audio import AudioMessage
 from pyrtmp.messages.command import NCConnect, NCCreateStream, NSPublish, NSCloseStream, NSDeleteStream
 from pyrtmp.messages.data import MetaDataMessage
-from pyrtmp.messages.protocolcontrol import WindowAcknowledgementSize, SetChunkSize, SetPeerBandwidth
-from pyrtmp.messages.usercontrol import StreamBegin
+from pyrtmp.messages.factory import MessageFactory
+from pyrtmp.messages.protocol_control import WindowAcknowledgementSize, SetChunkSize, SetPeerBandwidth
+from pyrtmp.messages.user_control import StreamBegin
 from pyrtmp.messages.video import VideoMessage
+from pyrtmp.session_manager import SessionManager
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -75,10 +77,11 @@ class SimpleRTMPController(BaseRTMPController):
         try:
             # do handshake
             await self.on_handshake(session)
+            logger.debug(f"Handshake! {session.peername}")
 
             # read chunks
             async for chunk in session.read_chunks_from_stream():
-                message = chunk.as_message()
+                message = MessageFactory.from_chunk(chunk)
                 logger.debug(f"Receiving {str(message)} {message.chunk_id}")
                 if isinstance(message, NCConnect):
                     await self.on_nc_connect(session, message)
@@ -106,6 +109,8 @@ class SimpleRTMPController(BaseRTMPController):
         except StreamClosedException as ex:
             logger.debug(f'Client disconnected {session.peername}')
             await self.on_stream_closed(session, ex)
+        except Exception as ex:
+            logger.exception(ex)
         finally:
             await self.cleanup(session)
 

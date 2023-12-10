@@ -1,13 +1,19 @@
 import asyncio
 import os
 import tempfile
+import unittest
 
-from aiounittest import AsyncTestCase
 from example.demo_ffmpeg import serve_rtmp
 from tests import invoke_command, remove_if_exist
 
 
-class TestFFMPEG(AsyncTestCase):
+class TestFFMPEG(unittest.IsolatedAsyncioTestCase):
+
+    async def asyncSetUp(self):
+        _loop = asyncio.get_event_loop()
+        _loop._close_loop = _loop.close
+        _loop.close = lambda: ()
+        asyncio.set_event_loop(_loop)
 
     async def test_single_ffmpeg(self):
         with tempfile.TemporaryDirectory() as tempdir:
@@ -45,7 +51,7 @@ class TestFFMPEG(AsyncTestCase):
                 tasks.append(invoke_command(command.format(f"rtmp://127.0.0.1:1935/test/{stream_name}")))
 
             # when
-            await asyncio.wait(tasks)
+            await asyncio.gather(*tasks)
 
             # then
             task0.cancel()

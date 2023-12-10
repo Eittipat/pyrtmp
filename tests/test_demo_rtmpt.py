@@ -1,20 +1,20 @@
 import asyncio
 import os
 import tempfile
-from aiounittest import AsyncTestCase
+import unittest
+
 from example.demo_rtmpt import serve_rtmpt
-from tests import invoke_command
+from tests import invoke_command, remove_if_exist
 
 
-class TestRTMP(AsyncTestCase):
+class TestRTMP(unittest.IsolatedAsyncioTestCase):
 
     async def test_single_rtmpt(self):
         # given
         filename = "SampleVideo_1280x720_5mb.flv"
         stream_path = "rtmpt://127.0.0.1:5000/test/test_rtmpt"
         target = os.path.join(tempfile.gettempdir(), "test_rtmpt" + ".flv")
-        if os.path.exists(target):
-            os.remove(target)
+        remove_if_exist(target)
         task0 = asyncio.create_task(serve_rtmpt(tempfile.gettempdir()))
         task1 = invoke_command(f"ffmpeg -i {filename} -c:v copy -c:a copy -f flv {stream_path}")
 
@@ -35,15 +35,14 @@ class TestRTMP(AsyncTestCase):
         task0 = asyncio.create_task(serve_rtmpt(tempfile.gettempdir()))
         tasks = []
         for i in range(3):
+            command = "ffmpeg -i SampleVideo_1280x720_5mb.flv -c:v copy -c:a copy -f flv {}"
             stream_name = f"test_rtmp_{i}"
             target = os.path.join(tempfile.gettempdir(), stream_name + ".flv")
-            if os.path.exists(target):
-                os.remove(target)
-            tasks.append(invoke_command(
-                f"ffmpeg -i SampleVideo_1280x720_5mb.flv -c:v copy -c:a copy -f flv rtmpt://127.0.0.1:5000/test/{stream_name}"))
+            remove_if_exist(target)
+            tasks.append(invoke_command(command.format(f"rtmpt://127.0.0.1:5000/test/{stream_name}")))
 
         # when
-        await asyncio.wait(tasks)
+        await asyncio.gather(*tasks)
 
         # then
         task0.cancel()

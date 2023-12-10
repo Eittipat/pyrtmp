@@ -100,7 +100,8 @@ async def open(segment: int):
         session_id=sid,
         peer=request.scope["client"],
         controller=config["controller"],
-        loop=asyncio.get_running_loop())
+        loop=asyncio.get_running_loop(),
+    )
     resp = quart.Response(sid)
     resp.headers['Content-Type'] = 'application/x-fcs'
     resp.headers['Cache-Control'] = 'no-cache'
