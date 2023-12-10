@@ -1,5 +1,5 @@
 # PyRTMP: Pure Python RTMP server
-![coverage](https://github.com/Eittipat/pyrtmp/coverage.svg)
+![coverage](https://github.com/Eittipat/pyrtmp/blob/master/coverage.svg)
 ## Features
 
 - ✅ Pure Python
