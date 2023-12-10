@@ -1,6 +1,6 @@
 from bitstring import BitStream, BitArray
 
-from pyrtmp import FIFOStream
+from pyrtmp import BitStreamReader
 
 
 class C0:
@@ -10,7 +10,7 @@ class C0:
         super().__init__()
 
     @classmethod
-    async def from_stream(cls, stream: FIFOStream):
+    async def from_stream(cls, stream: BitStreamReader):
         protocol_version = await stream.read('uint:8')
         return cls(protocol_version=protocol_version)
 
@@ -29,7 +29,7 @@ class C1:
         super().__init__()
 
     @classmethod
-    async def from_stream(cls, stream: FIFOStream):
+    async def from_stream(cls, stream: BitStreamReader):
         time = await stream.read('uint:32')
         zero = await stream.read('uint:32')
         rand = await stream.read('bytes:1528')
@@ -52,7 +52,7 @@ class C2:
         super().__init__()
 
     @classmethod
-    async def from_stream(cls, stream: FIFOStream):
+    async def from_stream(cls, stream: BitStreamReader):
         time1 = await stream.read('uint:32')
         time2 = await stream.read('uint:32')
         rand = await stream.read('bytes:1528')
