@@ -16,6 +16,10 @@ class TestRTMP(unittest.IsolatedAsyncioTestCase):
         target = os.path.join(tempfile.gettempdir(), "test_rtmpt" + ".flv")
         remove_if_exist(target)
         task0 = asyncio.create_task(serve_rtmpt(tempfile.gettempdir()))
+
+        # wait for server to start
+        await asyncio.sleep(3)
+
         task1 = invoke_command(f"ffmpeg -i {filename} -c:v copy -c:a copy -f flv {stream_path}")
 
         # when
@@ -33,6 +37,10 @@ class TestRTMP(unittest.IsolatedAsyncioTestCase):
     async def test_multiple_rtmpt(self):
         # given
         task0 = asyncio.create_task(serve_rtmpt(tempfile.gettempdir()))
+
+        # wait for server to start
+        await asyncio.sleep(3)
+
         tasks = []
         for i in range(3):
             command = "ffmpeg -i SampleVideo_1280x720_5mb.flv -c:v copy -c:a copy -f flv {}"

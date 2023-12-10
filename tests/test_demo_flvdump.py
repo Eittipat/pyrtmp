@@ -23,6 +23,10 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
             target = os.path.join(tempdir, stream_name + ".flv")
             remove_if_exist(target)
             task0 = asyncio.create_task(serve_rtmp(tempdir))
+
+            # wait for server to start
+            await asyncio.sleep(3)
+
             task1 = invoke_command(command.format(f"rtmp://127.0.0.1:1935/test/{stream_name}"))
 
             # when
@@ -41,6 +45,10 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             # given
             task0 = asyncio.create_task(serve_rtmp(tempdir))
+
+            # wait for server to start
+            await asyncio.sleep(3)
+
             tasks = []
             for i in range(3):
                 command = "ffmpeg -i SampleVideo_1280x720_5mb.flv -c:v copy -c:a copy -f flv {}"
