@@ -1,0 +1,27 @@
+name: CI/CD when pull-request or merge to main branch
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [ opened, reopened, synchronize ]
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: FedericoCarboni/setup-ffmpeg@v2
+        id: setup-ffmpeg
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - run: make install
+      - run: make unittest
