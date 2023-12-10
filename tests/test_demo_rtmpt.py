@@ -61,7 +61,7 @@ class TestRTMP(unittest.IsolatedAsyncioTestCase):
 
             # check flv
             for i in range(3):
-                stream_name = f"test_rtmp_{i}"
+                stream_name = f"test_rtmpt_{i}"
                 target = os.path.join(tempdir, stream_name + ".flv")
                 stdout, stderr = await invoke_command(f"ffprobe -i {target} -show_format | grep duration")
                 self.assertEqual(stdout.decode().startswith("duration=26"), True)

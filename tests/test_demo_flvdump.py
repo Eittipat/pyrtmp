@@ -15,7 +15,7 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
         _loop.close = lambda: ()
         asyncio.set_event_loop(_loop)
 
-    async def test_single_rtmp(self):
+    async def test_single_flvdump(self):
         with tempfile.TemporaryDirectory() as tempdir:
             # given
             command = "ffmpeg -i SampleVideo_1280x720_5mb.flv -c:v copy -c:a copy -f flv {}"
@@ -41,7 +41,7 @@ class TestFLVDump(unittest.IsolatedAsyncioTestCase):
             stdout, stderr = await invoke_command(f"ffprobe -i {target} -show_format | grep duration")
             self.assertEqual(stdout.decode().startswith("duration=26"), True)
 
-    async def test_multiple_rtmp(self):
+    async def test_multiple_flvdump(self):
         with tempfile.TemporaryDirectory() as tempdir:
             # given
             server = SimpleServer(tempdir)
