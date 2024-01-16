@@ -51,13 +51,13 @@ class BitStreamReader:
 
 class BufferedWriteTransport(WriteTransport):
 
-    def __init__(self, buffer: BytesIO, extra: Optional[Mapping[Any, Any]] = ...) -> None:
+    def __init__(self, buffer: BytesIO, extra: Mapping[Any, Any] | None = ...) -> None:
         self._buffer = buffer
         self._closing = False
         self._closed = False
         super().__init__(extra)
 
-    def set_write_buffer_limits(self, high: Optional[int] = ..., low: Optional[int] = ...) -> None:
+    def set_write_buffer_limits(self, high: int | None = ..., low: int | None = ...) -> None:
         raise NotImplementedError
 
     def get_write_buffer_size(self) -> int:
