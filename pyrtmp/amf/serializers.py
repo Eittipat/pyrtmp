@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from bitstring import BitStream, BitArray
 
@@ -17,9 +17,9 @@ class AMF0Serializer:
             cls.write_number_object(data, value)
         elif isinstance(value, int):
             cls.write_number_object(data, value)
-        elif isinstance(value, Dict):
+        elif isinstance(value, dict):
             cls.write_object_object(data, value)
-        elif isinstance(value, List):
+        elif isinstance(value, list):
             cls.write_array_object(data, value)
         elif value is None:
             cls.write_null_object(data)
@@ -55,7 +55,7 @@ class AMF0Serializer:
         data.pos = pos
 
     @classmethod
-    def write_object_object(cls, data: BitStream, value: Dict):
+    def write_object_object(cls, data: BitStream, value: dict):
         pos = data.pos
         data.append(BitArray(uint=AMF0.OBJECT, length=8))
         for k, v in value.items():
@@ -66,7 +66,7 @@ class AMF0Serializer:
         data.pos = pos
 
     @classmethod
-    def write_array_object(cls, data: BitStream, value: List):
+    def write_array_object(cls, data: BitStream, value: list):
         pos = data.pos
         data.append(BitArray(uint=AMF0.ARRAY, length=8))
         data.append(BitArray(uint=len(value), length=32))

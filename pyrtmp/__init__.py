@@ -1,7 +1,8 @@
 import os
 from asyncio import StreamReader, WriteTransport
 from io import BytesIO
-from typing import Any, List, Optional, Mapping
+from typing import Any, Optional
+from collections.abc import Mapping
 from bitstring import BitStream
 from bitstring.utils import tokenparser
 
@@ -65,7 +66,7 @@ class BufferedWriteTransport(WriteTransport):
     def write(self, data: Any) -> None:
         self._buffer.write(data)
 
-    def writelines(self, list_of_data: List[Any]) -> None:
+    def writelines(self, list_of_data: list[Any]) -> None:
         raise NotImplementedError
 
     def write_eof(self) -> None:

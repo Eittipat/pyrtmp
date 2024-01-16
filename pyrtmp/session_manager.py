@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Generator
+from collections.abc import Generator
 from bitstring import BitStream
 from pyrtmp import BitStreamReader, random_byte_array
 from pyrtmp.messages import Chunk, RawChunk
