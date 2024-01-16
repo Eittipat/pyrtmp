@@ -4,14 +4,13 @@ from pyrtmp import BitStreamReader
 
 
 class C0:
-
     def __init__(self, protocol_version: int) -> None:
         self.protocol_version = protocol_version
         super().__init__()
 
     @classmethod
     async def from_stream(cls, stream: BitStreamReader):
-        protocol_version = await stream.read('uint:8')
+        protocol_version = await stream.read("uint:8")
         return cls(protocol_version=protocol_version)
 
     def to_bytes(self):
@@ -21,7 +20,6 @@ class C0:
 
 
 class C1:
-
     def __init__(self, time: int, zero: int, random: bytes) -> None:
         self.time = time
         self.zero = zero
@@ -30,9 +28,9 @@ class C1:
 
     @classmethod
     async def from_stream(cls, stream: BitStreamReader):
-        time = await stream.read('uint:32')
-        zero = await stream.read('uint:32')
-        rand = await stream.read('bytes:1528')
+        time = await stream.read("uint:32")
+        zero = await stream.read("uint:32")
+        rand = await stream.read("bytes:1528")
         return cls(time=time, zero=zero, random=rand)
 
     def to_bytes(self):
@@ -44,7 +42,6 @@ class C1:
 
 
 class C2:
-
     def __init__(self, time1: int, time2: int, random: bytes) -> None:
         self.time1 = time1
         self.time2 = time2
@@ -53,9 +50,9 @@ class C2:
 
     @classmethod
     async def from_stream(cls, stream: BitStreamReader):
-        time1 = await stream.read('uint:32')
-        time2 = await stream.read('uint:32')
-        rand = await stream.read('bytes:1528')
+        time1 = await stream.read("uint:32")
+        time2 = await stream.read("uint:32")
+        rand = await stream.read("bytes:1528")
         return cls(time1=time1, time2=time2, random=rand)
 
     def to_bytes(self):

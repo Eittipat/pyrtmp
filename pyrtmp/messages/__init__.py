@@ -19,14 +19,14 @@ class BaseChunk:
     payload: bytes
 
     def __init__(
-            self,
-            chunk_type: int,
-            chunk_id: int,
-            timestamp: int,
-            msg_length: int,
-            msg_type_id: int,
-            msg_stream_id: int,
-            payload: bytes,
+        self,
+        chunk_type: int,
+        chunk_id: int,
+        timestamp: int,
+        msg_length: int,
+        msg_type_id: int,
+        msg_stream_id: int,
+        payload: bytes,
     ) -> None:
         self.chunk_type = chunk_type
         self.chunk_id = chunk_id
@@ -50,20 +50,20 @@ class BaseChunk:
 
 
 class RawChunk(BaseChunk):
-    raw_chunk_number: int = 0,
-    is_eof: bool = False,
+    raw_chunk_number: int = (0,)
+    is_eof: bool = (False,)
 
     def __init__(
-            self,
-            chunk_type: int,
-            chunk_id: int,
-            timestamp: int,
-            msg_length: int,
-            msg_type_id: int,
-            msg_stream_id: int,
-            payload: bytes,
-            raw_chunk_number: int = 0,
-            is_eof: bool = False,
+        self,
+        chunk_type: int,
+        chunk_id: int,
+        timestamp: int,
+        msg_length: int,
+        msg_type_id: int,
+        msg_stream_id: int,
+        payload: bytes,
+        raw_chunk_number: int = 0,
+        is_eof: bool = False,
     ) -> None:
         super().__init__(
             chunk_type=chunk_type,
@@ -126,7 +126,6 @@ class RawChunk(BaseChunk):
 
 
 class Chunk(BaseChunk):
-
     def print_debug(self):
         logger.debug(f"======{self.__class__}======")
         for key in self.__dict__.keys():
@@ -166,7 +165,8 @@ class Chunk(BaseChunk):
                 msg_stream_id=self.msg_stream_id,
                 payload=payload[:bytes_length],
                 raw_chunk_number=chunk_number,
-                is_eof=is_eof)
+                is_eof=is_eof,
+            )
             chunks.append(raw_chunk)
             chunk_number += 1
             chunk_type = 3  # next raw chunk always 3

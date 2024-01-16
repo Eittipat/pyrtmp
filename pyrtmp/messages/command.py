@@ -12,7 +12,6 @@ logger.setLevel(logging.DEBUG)
 
 
 class CommandMessage(Chunk):
-
     def __init__(self, command_name: str, **kwargs):
         super().__init__(**kwargs)
         self.command_name = command_name
@@ -60,13 +59,12 @@ class NetConnectionCommand(CommandMessage):
 
 
 class NCConnect(NetConnectionCommand):
-
     def __init__(
-            self,
-            transaction_id: int,
-            command_object: dict,
-            optional_user_arguments: dict | None,
-            **kwargs,
+        self,
+        transaction_id: int,
+        command_object: dict,
+        optional_user_arguments: dict | None,
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.transaction_id = transaction_id
@@ -97,16 +95,22 @@ class NCConnect(NetConnectionCommand):
         # payload
         AMF0Serializer.create_object(data, "_result")
         AMF0Serializer.create_object(data, 1)
-        AMF0Serializer.create_object(data, {
-            "fmsVer": "FMS/3,0,123",
-            "capabilities": 31,
-        })
-        AMF0Serializer.create_object(data, {
-            "level": "status",
-            "code": "NetConnection.Connect.Success",
-            "description": "Connection succeeds",
-            "objectEncoding": 0,
-        })
+        AMF0Serializer.create_object(
+            data,
+            {
+                "fmsVer": "FMS/3,0,123",
+                "capabilities": 31,
+            },
+        )
+        AMF0Serializer.create_object(
+            data,
+            {
+                "level": "status",
+                "code": "NetConnection.Connect.Success",
+                "description": "Connection succeeds",
+                "objectEncoding": 0,
+            },
+        )
 
         return Chunk(
             chunk_type=0,
@@ -128,7 +132,6 @@ class NCClose(NetConnectionCommand):
 
 
 class NCCreateStream(NetConnectionCommand):
-
     def __init__(self, transaction_id: int, command_object: dict, **kwargs):
         super().__init__(**kwargs)
         self.transaction_id = transaction_id
@@ -208,13 +211,12 @@ class NSPlay2(NetConnectionCommand):
 
 
 class NSDeleteStream(NetConnectionCommand):
-
     def __init__(
-            self,
-            stream_id: int,
-            transaction_id: int,
-            command_object: dict,
-            **kwargs,
+        self,
+        stream_id: int,
+        transaction_id: int,
+        command_object: dict,
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.stream_id = stream_id
@@ -238,12 +240,11 @@ class NSDeleteStream(NetConnectionCommand):
 
 
 class NSCloseStream(NetConnectionCommand):
-
     def __init__(
-            self,
-            transaction_id: int,
-            command_object: dict,
-            **kwargs,
+        self,
+        transaction_id: int,
+        command_object: dict,
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.transaction_id = transaction_id
@@ -272,14 +273,13 @@ class NSReceiveVideo(NetConnectionCommand):
 
 
 class NSPublish(NetConnectionCommand):
-
     def __init__(
-            self,
-            transaction_id: int,
-            command_object: dict,
-            publishing_name: str,
-            publishing_type: str,
-            **kwargs,
+        self,
+        transaction_id: int,
+        command_object: dict,
+        publishing_name: str,
+        publishing_type: str,
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.transaction_id = transaction_id
@@ -311,11 +311,9 @@ class NSPublish(NetConnectionCommand):
         AMF0Serializer.create_object(data, "onStatus")
         AMF0Serializer.create_object(data, 0)
         AMF0Serializer.create_object(data, None)
-        AMF0Serializer.create_object(data, {
-            "level": "status",
-            "code": "NetStream.Publish.Start",
-            "description": "Start publishing"
-        })
+        AMF0Serializer.create_object(
+            data, {"level": "status", "code": "NetStream.Publish.Start", "description": "Start publishing"}
+        )
 
         return Chunk(
             chunk_type=0,

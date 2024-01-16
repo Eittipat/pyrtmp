@@ -9,7 +9,6 @@ from pyrtmp.amf.serializers import AMF0Serializer
 
 
 class MockStreamReader(StreamReader):
-
     def __init__(self):
         super().__init__()
         self.mock_data = None
@@ -26,7 +25,6 @@ class MockStreamReader(StreamReader):
 
 
 class TestBitStreamReader(unittest.IsolatedAsyncioTestCase):
-
     async def test_enough_data(self):
         # given
         mock_data = BitArray("0b1111111100000000100010001000000011011011").bytes
@@ -48,15 +46,15 @@ class TestBitStreamReader(unittest.IsolatedAsyncioTestCase):
         stream = BitStreamReader(reader=mock_reader)
 
         async def feed_data():
-            mock_reader.set_mock_data(b'\xff')
+            mock_reader.set_mock_data(b"\xff")
             await asyncio.sleep(0.5)
-            mock_reader.set_mock_data(b'\x00')
+            mock_reader.set_mock_data(b"\x00")
             await asyncio.sleep(0.5)
-            mock_reader.set_mock_data(b'\x88')
+            mock_reader.set_mock_data(b"\x88")
             await asyncio.sleep(0.5)
-            mock_reader.set_mock_data(b'\x80')
+            mock_reader.set_mock_data(b"\x80")
             await asyncio.sleep(0.5)
-            mock_reader.set_mock_data(b'\xdb')
+            mock_reader.set_mock_data(b"\xdb")
             print("feed_data done")
 
         task = asyncio.create_task(feed_data())
@@ -73,7 +71,6 @@ class TestBitStreamReader(unittest.IsolatedAsyncioTestCase):
 
 
 class AMF0SerializerTestCase(unittest.TestCase):
-
     def test_write_boolean_object(self):
         # given
         data = BitStream()
@@ -84,7 +81,7 @@ class AMF0SerializerTestCase(unittest.TestCase):
         # then
         self.assertEqual(data.pos, 0)
         self.assertEqual(data.length, 8 + 8)
-        self.assertEqual(data.bytes, b'\x01\x01')
+        self.assertEqual(data.bytes, b"\x01\x01")
 
     def test_write_string_object(self):
         # given
@@ -96,7 +93,7 @@ class AMF0SerializerTestCase(unittest.TestCase):
         # then
         self.assertEqual(data.pos, 0)
         self.assertEqual(data.length, 8 + 16 + len("hello world") * 8)
-        self.assertEqual(data.bytes, b'\x02\x00\x0bhello world')
+        self.assertEqual(data.bytes, b"\x02\x00\x0bhello world")
 
     def test_write_number_object(self):
         # given
@@ -108,7 +105,7 @@ class AMF0SerializerTestCase(unittest.TestCase):
         # then
         self.assertEqual(data.pos, 0)
         self.assertEqual(data.length, 72)
-        self.assertEqual(data.bytes, b'\x00@\t!\xca\xc0\x83\x12o')
+        self.assertEqual(data.bytes, b"\x00@\t!\xca\xc0\x83\x12o")
 
     def test_write_null_object(self):
         # given
@@ -120,44 +117,54 @@ class AMF0SerializerTestCase(unittest.TestCase):
         # then
         self.assertEqual(data.pos, 0)
         self.assertEqual(data.length, 8)
-        self.assertEqual(data.bytes, b'\x05')
+        self.assertEqual(data.bytes, b"\x05")
 
     def test_write_object_object(self):
         # given
         data = BitStream()
 
         # when
-        AMF0Serializer.write_object_object(data, {
-            "key1": "value1",
-            "key2": 2,
-            "key3": True,
-        })
+        AMF0Serializer.write_object_object(
+            data,
+            {
+                "key1": "value1",
+                "key2": 2,
+                "key3": True,
+            },
+        )
 
         # then
         self.assertEqual(data.pos, 0)
         self.assertEqual(data.length, 336)
-        self.assertEqual(data.bytes,
-                         b'\x03\x00\x04' +
-                         b'key1\x02\x00\x06value1\x00\x04' +
-                         b'key2\x00@\x00\x00\x00\x00\x00\x00\x00\x00\x04' +
-                         b'key3\x01\x01\x00\x00\t')
+        self.assertEqual(
+            data.bytes,
+            b"\x03\x00\x04"
+            + b"key1\x02\x00\x06value1\x00\x04"
+            + b"key2\x00@\x00\x00\x00\x00\x00\x00\x00\x00\x04"
+            + b"key3\x01\x01\x00\x00\t",
+        )
 
     def test_write_array_object(self):
         # given
         data = BitStream()
 
         # when
-        AMF0Serializer.write_array_object(data, [
-            {"key1": "value1"},
-            {"key2": 2},
-            {"key3": True},
-        ])
+        AMF0Serializer.write_array_object(
+            data,
+            [
+                {"key1": "value1"},
+                {"key2": 2},
+                {"key3": True},
+            ],
+        )
 
         # then
         self.assertEqual(data.pos, 0)
         self.assertEqual(data.length, 368)
-        self.assertEqual(data.bytes,
-                         b'\x08\x00\x00\x00\x03\x00\x04'
-                         + b'key1\x02\x00\x06value1\x00\x04'
-                         + b'key2\x00@\x00\x00\x00\x00\x00\x00\x00\x00\x04'
-                         + b'key3\x01\x01\x00\x00\t')
+        self.assertEqual(
+            data.bytes,
+            b"\x08\x00\x00\x00\x03\x00\x04"
+            + b"key1\x02\x00\x06value1\x00\x04"
+            + b"key2\x00@\x00\x00\x00\x00\x00\x00\x00\x00\x04"
+            + b"key3\x01\x01\x00\x00\t",
+        )

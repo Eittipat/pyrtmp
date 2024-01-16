@@ -9,5 +9,3 @@ class AMF0(int, Enum):
     NULL = 0x05
     ARRAY = 0x08
     OBJECT_END = 0x09
-
-

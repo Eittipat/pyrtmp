@@ -6,7 +6,6 @@ from pyrtmp.amf.types import AMF0
 
 
 class AMF0Serializer:
-
     @classmethod
     def create_object(cls, data: BitStream, value):
         if isinstance(value, str):
@@ -81,11 +80,10 @@ class AMF0Serializer:
 
 
 class AMF0Deserializer:
-
     @classmethod
     def from_stream(cls, data: BitStream) -> Any:
         # determine object type
-        obj_type = data.peek('uint:8')
+        obj_type = data.peek("uint:8")
         if obj_type == AMF0.STRING:
             return cls.to_string_object(data)
         if obj_type == AMF0.NUMBER:
@@ -102,40 +100,40 @@ class AMF0Deserializer:
 
     @classmethod
     def to_boolean_object(cls, data: BitStream):
-        obj_type = data.read('uint:8')
+        obj_type = data.read("uint:8")
         assert obj_type == AMF0.BOOLEAN
-        value = data.read('uint:8')
+        value = data.read("uint:8")
         return False if value == 0 else True
 
     @classmethod
     def to_string_object(cls, data: BitStream):
-        obj_type = data.read('uint:8')
+        obj_type = data.read("uint:8")
         assert obj_type == AMF0.STRING
-        obj_length = data.read('uint:16')
-        return data.read(f'bytes:{obj_length}').decode()
+        obj_length = data.read("uint:16")
+        return data.read(f"bytes:{obj_length}").decode()
 
     @classmethod
     def to_number_object(cls, data: BitStream):
-        obj_type = data.read('uint:8')
+        obj_type = data.read("uint:8")
         assert obj_type == AMF0.NUMBER
-        return data.read('float:64')
+        return data.read("float:64")
 
     @classmethod
     def to_null_object(cls, data: BitStream):
-        obj_type = data.read('uint:8')
+        obj_type = data.read("uint:8")
         assert obj_type == AMF0.NULL
         return None
 
     @classmethod
     def to_object_object(cls, data: BitStream):
-        obj_type = data.read('uint:8')
+        obj_type = data.read("uint:8")
         assert obj_type == AMF0.OBJECT
         obj = {}
         ending = f"0000{int(AMF0.OBJECT_END):02x}"
-        while data.peek('bytes:3').hex() != ending:
+        while data.peek("bytes:3").hex() != ending:
             # read property name
-            size = data.read('uint:16')
-            property_name = data.read(f'bytes:{size}').decode()
+            size = data.read("uint:16")
+            property_name = data.read(f"bytes:{size}").decode()
             # read object value (AMF0)
             property_value = cls.from_stream(data)
             obj[property_name] = property_value
@@ -143,14 +141,14 @@ class AMF0Deserializer:
 
     @classmethod
     def to_array_object(cls, data: BitStream):
-        obj_type = data.read('uint:8')
+        obj_type = data.read("uint:8")
         assert obj_type == AMF0.ARRAY
         arr = []
-        count = data.read('uint:32')
+        count = data.read("uint:32")
         ending = f"0000{int(AMF0.OBJECT_END):02x}"
-        while data.peek('bytes:3').hex() != ending:
-            size = data.read('uint:16')
-            property_name = data.read(f'bytes:{size}').decode()
+        while data.peek("bytes:3").hex() != ending:
+            size = data.read("uint:16")
+            property_name = data.read(f"bytes:{size}").decode()
             # read object value (AMF0)
             property_value = cls.from_stream(data)
             arr.append({property_name: property_value})

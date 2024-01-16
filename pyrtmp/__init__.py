@@ -17,7 +17,6 @@ class StreamClosedException(Exception):
 
 
 class BitStreamReader:
-
     def __init__(self, reader: StreamReader) -> None:
         self.reader = reader
         self.buffer = BitStream()
@@ -51,7 +50,6 @@ class BitStreamReader:
 
 
 class BufferedWriteTransport(WriteTransport):
-
     def __init__(self, buffer: BytesIO, extra: Mapping[Any, Any] | None = ...) -> None:
         self._buffer = buffer
         self._closing = False

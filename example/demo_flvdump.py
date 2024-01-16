@@ -13,7 +13,6 @@ logger.setLevel(logging.DEBUG)
 
 
 class RTMP2FLVController(SimpleRTMPController):
-
     def __init__(self, output_directory: str):
         self.output_directory = output_directory
         super().__init__()
@@ -42,7 +41,6 @@ class RTMP2FLVController(SimpleRTMPController):
 
 
 class SimpleServer(SimpleRTMPServer):
-
     def __init__(self, output_directory: str):
         self.output_directory = output_directory
         super().__init__()
@@ -59,7 +57,7 @@ class SimpleServer(SimpleRTMPServer):
 async def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     server = SimpleServer(output_directory=current_dir)
-    await server.create(host='0.0.0.0', port=1935)
+    await server.create(host="0.0.0.0", port=1935)
     await server.start()
     await server.wait_closed()
 

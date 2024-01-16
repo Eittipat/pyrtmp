@@ -16,20 +16,19 @@ logger.setLevel(logging.DEBUG)
 
 
 class RTMP2SocketController(SimpleRTMPController):
-
     def __init__(self, output_directory: str):
         self.output_directory = output_directory
         super().__init__()
 
     async def on_ns_publish(self, session, message) -> None:
         publishing_name = message.publishing_name
-        prefix = os.path.join(self.output_directory, f'{publishing_name}')
+        prefix = os.path.join(self.output_directory, f"{publishing_name}")
         session.state = RemoteProcessFLVWriter()
-        logger.debug(f'output to {prefix}.flv')
+        logger.debug(f"output to {prefix}.flv")
         await session.state.initialize(
             command=f"ffmpeg -y -i pipe:0 -c:v copy -c:a copy -f flv {prefix}.flv",
-            stdout_log=f'{prefix}.stdout.log',
-            stderr_log=f'{prefix}.stderr.log',
+            stdout_log=f"{prefix}.stdout.log",
+            stderr_log=f"{prefix}.stderr.log",
         )
         session.state.write_header()
         await super().on_ns_publish(session, message)
@@ -52,7 +51,6 @@ class RTMP2SocketController(SimpleRTMPController):
 
 
 class RemoteProcessFLVWriter:
-
     def __init__(self):
         self.proc = None
         self.stdout = None
@@ -70,7 +68,7 @@ class RemoteProcessFLVWriter:
         self.stderr = asyncio.create_task(self._read_to_file(stderr_log, self.proc.stderr))
 
     async def _read_to_file(self, filename: str, stream: StreamReader):
-        fp = open(filename, 'w')
+        fp = open(filename, "w")
         while not stream.at_eof():
             data = await stream.readline()
             fp.write(data.decode())
@@ -92,7 +90,6 @@ class RemoteProcessFLVWriter:
 
 
 class SimpleServer(SimpleRTMPServer):
-
     def __init__(self, output_directory: str):
         self.output_directory = output_directory
         super().__init__()
@@ -109,7 +106,7 @@ class SimpleServer(SimpleRTMPServer):
 async def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     server = SimpleServer(output_directory=current_dir)
-    await server.create(host='0.0.0.0', port=1935)
+    await server.create(host="0.0.0.0", port=1935)
     await server.start()
     await server.wait_closed()
 

@@ -14,7 +14,8 @@ async def invoke_command(command: str):
     proc = None
     try:
         proc = await asyncio.subprocess.create_subprocess_shell(
-            command, stdout=asyncio.subprocess.PIPE,
+            command,
+            stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
         stdout, stderr = await proc.communicate()

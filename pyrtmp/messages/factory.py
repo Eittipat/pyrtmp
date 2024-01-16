@@ -14,10 +14,8 @@ from pyrtmp.messages.video import VideoMessage
 
 
 class MessageFactory:
-
     @classmethod
     def from_chunk(cls, chunk: Chunk):
-
         # protocol control message
         if chunk.msg_type_id == 0x01:
             return SetChunkSize.from_chunk(chunk)

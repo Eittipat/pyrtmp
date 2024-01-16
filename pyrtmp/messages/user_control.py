@@ -9,11 +9,10 @@ logger.setLevel(logging.DEBUG)
 
 
 class UserControlMessage(Chunk):
-
     @classmethod
     def from_chunk(cls, chunk: Chunk):
         data = BitStream(chunk.payload)
-        signature = data.read('uint:16')
+        signature = data.read("uint:16")
         if signature == 0:
             return StreamBegin.from_chunk(chunk)
         logger.warning(f"Unknown CommandMessage '{signature}', use default parser")
@@ -23,13 +22,12 @@ class UserControlMessage(Chunk):
 
 
 class StreamBegin(UserControlMessage):
-
     @classmethod
     def from_chunk(cls, chunk: Chunk):
         data = BitStream(chunk.payload)
         instance = cls(**chunk.__dict__)
-        instance.event_type = data.read('uint:16')
-        instance.stream_id = data.read('uint:32')
+        instance.event_type = data.read("uint:16")
+        instance.stream_id = data.read("uint:32")
         return instance
 
     def __init__(self, stream_id: int) -> bytes:
@@ -50,13 +48,12 @@ class StreamBegin(UserControlMessage):
 
 
 class StreamEOF(UserControlMessage):
-
     @classmethod
     def from_chunk(cls, chunk: Chunk):
         data = BitStream(chunk.payload)
         instance = cls(**chunk.__dict__)
-        instance.event_type = data.read('uint:16')
-        instance.stream_id = data.read('uint:32')
+        instance.event_type = data.read("uint:16")
+        instance.stream_id = data.read("uint:32")
         return instance
 
     def __init__(self, stream_id: int) -> bytes:
@@ -77,13 +74,12 @@ class StreamEOF(UserControlMessage):
 
 
 class StreamDry(UserControlMessage):
-
     @classmethod
     def from_chunk(cls, chunk: Chunk):
         data = BitStream(chunk.payload)
         instance = cls(**chunk.__dict__)
-        instance.event_type = data.read('uint:16')
-        instance.stream_id = data.read('uint:32')
+        instance.event_type = data.read("uint:16")
+        instance.stream_id = data.read("uint:32")
         return instance
 
     def __init__(self, stream_id: int) -> bytes:
@@ -104,14 +100,13 @@ class StreamDry(UserControlMessage):
 
 
 class SetBufferLength(UserControlMessage):
-
     @classmethod
     def from_chunk(cls, chunk: Chunk):
         data = BitStream(chunk.payload)
         instance = cls(**chunk.__dict__)
-        instance.event_type = data.read('uint:16')
-        instance.stream_id = data.read('uint:32')
-        instance.milliseconds = data.read('uint:32')
+        instance.event_type = data.read("uint:16")
+        instance.stream_id = data.read("uint:32")
+        instance.milliseconds = data.read("uint:32")
         return instance
 
     def __init__(self, stream_id: int, milliseconds: int) -> bytes:
@@ -134,13 +129,12 @@ class SetBufferLength(UserControlMessage):
 
 
 class StreamIsRecorded(UserControlMessage):
-
     @classmethod
     def from_chunk(cls, chunk: Chunk):
         data = BitStream(chunk.payload)
         instance = cls(**chunk.__dict__)
-        instance.event_type = data.read('uint:16')
-        instance.stream_id = data.read('uint:32')
+        instance.event_type = data.read("uint:16")
+        instance.stream_id = data.read("uint:32")
         return instance
 
     def __init__(self, stream_id: int) -> bytes:
@@ -161,13 +155,12 @@ class StreamIsRecorded(UserControlMessage):
 
 
 class PingRequest(UserControlMessage):
-
     @classmethod
     def from_chunk(cls, chunk: Chunk):
         data = BitStream(chunk.payload)
         instance = cls(**chunk.__dict__)
-        instance.event_type = data.read('uint:16')
-        instance.timestamp = data.read('uint:32')
+        instance.event_type = data.read("uint:16")
+        instance.timestamp = data.read("uint:32")
         return instance
 
     def __init__(self, timestamp: int) -> bytes:
@@ -188,13 +181,12 @@ class PingRequest(UserControlMessage):
 
 
 class PingResponse(UserControlMessage):
-
     @classmethod
     def from_chunk(cls, chunk: Chunk):
         data = BitStream(chunk.payload)
         instance = cls(**chunk.__dict__)
-        instance.event_type = data.read('uint:16')
-        instance.timestamp = data.read('uint:32')
+        instance.event_type = data.read("uint:16")
+        instance.timestamp = data.read("uint:32")
         return instance
 
     def __init__(self, timestamp: int) -> bytes:

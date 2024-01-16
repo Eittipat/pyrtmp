@@ -26,7 +26,6 @@ class DataMessage(Chunk):
 
 
 class MetaDataMessage(DataMessage):
-
     @classmethod
     def from_chunk(cls, chunk: Chunk):
         instance = cls(**chunk.__dict__)
