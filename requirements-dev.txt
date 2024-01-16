@@ -4,4 +4,5 @@ quart>=0.19.4
 pytest>=7.4.3
 coverage-badge
 coverage
+ruff==0.1.13
 twine

@@ -3,6 +3,10 @@ install:
 	@pip install -r requirements.txt
 	@pip install -r requirements-dev.txt
 
+ruff:
+	@ruff --fix .
+	@ruff format .
+
 unittest:
 	@cd tests && pytest ./ --no-header
 
