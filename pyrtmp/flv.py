@@ -1,5 +1,4 @@
 import enum
-from typing import BinaryIO
 
 from bitstring import BitStream, BitArray
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 import asyncio
 import os
 import logging
-from asyncio import StreamReader, Server
+from asyncio import StreamReader
 
 from pyrtmp import StreamClosedException
 from pyrtmp.flv import FLVMediaType, FLVWriter
