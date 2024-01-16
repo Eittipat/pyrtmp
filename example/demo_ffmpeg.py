@@ -69,7 +69,7 @@ class RemoteProcessFLVWriter:
         self.stderr = asyncio.create_task(self._read_to_file(stderr_log, self.proc.stderr))
 
     async def _read_to_file(self, filename: str, stream: StreamReader):
-        fp = open(filename, 'wt')
+        fp = open(filename, 'w')
         while not stream.at_eof():
             data = await stream.readline()
             fp.write(data.decode())

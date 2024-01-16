@@ -131,7 +131,7 @@ class AMF0Deserializer:
         obj_type = data.read('uint:8')
         assert obj_type == AMF0.OBJECT
         obj = {}
-        ending = "0000{:02x}".format(int(AMF0.OBJECT_END))
+        ending = f"0000{int(AMF0.OBJECT_END):02x}"
         while data.peek('bytes:3').hex() != ending:
             # read property name
             size = data.read('uint:16')
@@ -147,7 +147,7 @@ class AMF0Deserializer:
         assert obj_type == AMF0.ARRAY
         arr = []
         count = data.read('uint:32')
-        ending = "0000{:02x}".format(int(AMF0.OBJECT_END))
+        ending = f"0000{int(AMF0.OBJECT_END):02x}"
         while data.peek('bytes:3').hex() != ending:
             size = data.read('uint:16')
             property_name = data.read(f'bytes:{size}').decode()
