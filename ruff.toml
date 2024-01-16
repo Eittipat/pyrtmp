@@ -1,0 +1,9 @@
+line-length = 120
+
+select = ["C", "E", "F", "I", "U", "W"]
+ignore = ["C901"]
+
+target-version = "py310"
+
+[isort]
+combine-as-imports = true

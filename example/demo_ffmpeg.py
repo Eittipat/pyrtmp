@@ -1,13 +1,14 @@
 from __future__ import annotations
+
 import asyncio
-import os
 import logging
+import os
 from asyncio import StreamReader
 
 from pyrtmp import StreamClosedException
 from pyrtmp.flv import FLVMediaType, FLVWriter
+from pyrtmp.rtmp import RTMPProtocol, SimpleRTMPController, SimpleRTMPServer
 from pyrtmp.session_manager import SessionManager
-from pyrtmp.rtmp import SimpleRTMPController, RTMPProtocol, SimpleRTMPServer
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)

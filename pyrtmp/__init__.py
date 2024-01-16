@@ -1,8 +1,9 @@
 import os
 from asyncio import StreamReader, WriteTransport
-from io import BytesIO
-from typing import Any, Optional
 from collections.abc import Mapping
+from io import BytesIO
+from typing import Any
+
 from bitstring import BitStream
 from bitstring.utils import tokenparser
 

@@ -1,6 +1,6 @@
 from typing import Any
 
-from bitstring import BitStream, BitArray
+from bitstring import BitArray, BitStream
 
 from pyrtmp.amf.types import AMF0
 

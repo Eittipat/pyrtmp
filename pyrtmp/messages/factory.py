@@ -3,8 +3,11 @@ from pyrtmp.messages.audio import AudioMessage
 from pyrtmp.messages.command import CommandMessage
 from pyrtmp.messages.data import DataMessage
 from pyrtmp.messages.protocol_control import (
-    SetChunkSize, AbortMessage, Acknowledgement,
-    WindowAcknowledgementSize, SetPeerBandwidth,
+    AbortMessage,
+    Acknowledgement,
+    SetChunkSize,
+    SetPeerBandwidth,
+    WindowAcknowledgementSize,
 )
 from pyrtmp.messages.user_control import UserControlMessage
 from pyrtmp.messages.video import VideoMessage

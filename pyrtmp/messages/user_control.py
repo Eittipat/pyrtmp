@@ -1,6 +1,6 @@
 import logging
 
-from bitstring import BitStream, BitArray
+from bitstring import BitArray, BitStream
 
 from pyrtmp.messages import Chunk
 

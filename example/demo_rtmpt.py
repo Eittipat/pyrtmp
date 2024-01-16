@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 import uuid
-from asyncio import StreamReader, StreamWriter, events, BaseProtocol
+from asyncio import BaseProtocol, StreamReader, StreamWriter, events
 from io import BytesIO
 
 import quart

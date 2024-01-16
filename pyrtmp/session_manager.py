@@ -1,6 +1,9 @@
 from __future__ import annotations
+
 from collections.abc import Generator
+
 from bitstring import BitStream
+
 from pyrtmp import BitStreamReader, random_byte_array
 from pyrtmp.messages import Chunk, RawChunk
 from pyrtmp.messages.handshake import C0, C1, C2

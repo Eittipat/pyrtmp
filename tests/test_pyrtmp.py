@@ -1,8 +1,9 @@
 import asyncio
 import unittest
-
 from asyncio import StreamReader
+
 from bitstring import BitArray, BitStream
+
 from pyrtmp import BitStreamReader
 from pyrtmp.amf.serializers import AMF0Serializer
 

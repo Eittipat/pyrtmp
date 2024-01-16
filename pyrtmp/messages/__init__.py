@@ -1,8 +1,9 @@
 from __future__ import annotations
-from collections.abc import Iterable
-from bitstring import BitStream, BitArray
 
 import logging
+from collections.abc import Iterable
+
+from bitstring import BitArray, BitStream
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

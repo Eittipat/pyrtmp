@@ -1,6 +1,6 @@
 import enum
 
-from bitstring import BitStream, BitArray
+from bitstring import BitArray, BitStream
 
 
 class FLVTag:
