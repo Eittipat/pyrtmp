@@ -114,6 +114,8 @@ class SimpleRTMPController(BaseRTMPController):
         finally:
             await self.cleanup(session)
 
+        writer.close()
+
     async def on_handshake(self, session) -> None:
         await session.handshake()
 
