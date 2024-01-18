@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 import uuid
-from asyncio import StreamReader, StreamWriter, events, BaseProtocol
+from asyncio import BaseProtocol, StreamReader, StreamWriter, events
 from io import BytesIO
 
 import quart
@@ -23,7 +23,6 @@ config = {}
 
 
 class DummyProtocol(BaseProtocol):
-
     async def _drain_helper(self):
         pass
 
@@ -32,12 +31,9 @@ class DummyProtocol(BaseProtocol):
 
 
 class RTMPTWrapper:
-
-    def __init__(self,
-                 session_id: str,
-                 peer: tuple,
-                 controller: BaseRTMPController,
-                 loop: events.AbstractEventLoop) -> None:
+    def __init__(
+        self, session_id: str, peer: tuple, controller: BaseRTMPController, loop: events.AbstractEventLoop
+    ) -> None:
         self.delay = 0
         self.loop = loop
         self.session_id = session_id
@@ -46,12 +42,16 @@ class RTMPTWrapper:
         self.stream = BytesIO()
         self.reader = StreamReader(loop=self.loop)
         self.writer = StreamWriter(
-            BufferedWriteTransport(self.stream, extra={
-                "peername": peer,
-            }),
+            BufferedWriteTransport(
+                self.stream,
+                extra={
+                    "peername": peer,
+                },
+            ),
             DummyProtocol(),
             self.reader,
-            self.loop)
+            self.loop,
+        )
         self.task = self.loop.create_task(self._dispatcher())
 
     async def _dispatcher(self):
@@ -91,7 +91,7 @@ class RTMPTWrapper:
         return buffer
 
 
-@app.route('/open/<int:segment>', methods=['POST'])
+@app.route("/open/<int:segment>", methods=["POST"])
 async def open(segment: int):
     # body = await request.body
     # assert body == b'\x00'
@@ -103,42 +103,42 @@ async def open(segment: int):
         loop=asyncio.get_running_loop(),
     )
     resp = quart.Response(sid)
-    resp.headers['Content-Type'] = 'application/x-fcs'
-    resp.headers['Cache-Control'] = 'no-cache'
+    resp.headers["Content-Type"] = "application/x-fcs"
+    resp.headers["Cache-Control"] = "no-cache"
     return resp
 
 
-@app.route('/send/<string:sid>/<int:segment>', methods=['POST'])
+@app.route("/send/<string:sid>/<int:segment>", methods=["POST"])
 async def send(sid: str, segment: int):
     body = await request.body
     session[sid].reader.feed_data(body)
     data = await session[sid].read_from_buffer()
     resp = quart.Response(data)
-    resp.headers['Content-Type'] = 'application/x-fcs'
-    resp.headers['Cache-Control'] = 'no-cache'
+    resp.headers["Content-Type"] = "application/x-fcs"
+    resp.headers["Cache-Control"] = "no-cache"
     return resp
 
 
-@app.route('/idle/<string:sid>/<int:segment>', methods=['POST'])
+@app.route("/idle/<string:sid>/<int:segment>", methods=["POST"])
 async def idle(sid: str, segment: int):
     # body = await request.body
     # assert body == b'\x00'
     data = await session[sid].read_from_buffer()
     resp = quart.Response(data)
-    resp.headers['Content-Type'] = 'application/x-fcs'
-    resp.headers['Cache-Control'] = 'no-cache'
+    resp.headers["Content-Type"] = "application/x-fcs"
+    resp.headers["Cache-Control"] = "no-cache"
     return resp
 
 
-@app.route('/close/<string:sid>/<int:segment>', methods=['POST'])
+@app.route("/close/<string:sid>/<int:segment>", methods=["POST"])
 async def close(sid: str, segment: int):
     # body = await request.body
     # assert body == b'\x00'
     data = await session[sid].read_from_buffer()
     session[sid].close()
     resp = quart.Response(data)
-    resp.headers['Content-Type'] = 'application/x-fcs'
-    resp.headers['Cache-Control'] = 'no-cache'
+    resp.headers["Content-Type"] = "application/x-fcs"
+    resp.headers["Cache-Control"] = "no-cache"
     return resp
 
 

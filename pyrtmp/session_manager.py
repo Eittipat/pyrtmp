@@ -1,19 +1,16 @@
 from __future__ import annotations
-from typing import Generator
+
+from collections.abc import Generator
+
 from bitstring import BitStream
+
 from pyrtmp import BitStreamReader, random_byte_array
 from pyrtmp.messages import Chunk, RawChunk
 from pyrtmp.messages.handshake import C0, C1, C2
 
 
 class SessionManager:
-
-    def __init__(
-            self,
-            reader,
-            writer,
-            reader_chunk_size=128,
-            writer_chunk_size=128) -> None:
+    def __init__(self, reader, writer, reader_chunk_size=128, writer_chunk_size=128) -> None:
         self.reader = reader
         self.writer = writer
         self.reader_chunk_size = reader_chunk_size
@@ -30,7 +27,7 @@ class SessionManager:
 
     @property
     def peername(self):
-        a, b = self.writer.get_extra_info('peername')
+        a, b = self.writer.get_extra_info("peername")
         return f"{a}:{b}"
 
     def set_latest_chunk(self, chunk: RawChunk):
@@ -103,12 +100,12 @@ class SessionManager:
         stream = self.fifo_reader
         chunk_size = self.reader_chunk_size
 
-        fmt = await stream.read('uint:2')
-        cs_id = await stream.read('uint:6')
+        fmt = await stream.read("uint:2")
+        cs_id = await stream.read("uint:6")
         if cs_id == 0:
-            cs_id = await stream.read('uint:8') + 64
+            cs_id = await stream.read("uint:8") + 64
         elif cs_id == 1:
-            cs_id = await stream.read('uint:16') + 64
+            cs_id = await stream.read("uint:16") + 64
         elif cs_id == 2:
             pass
 
@@ -116,20 +113,20 @@ class SessionManager:
 
         if fmt == 0:
             # 11 bytes
-            timestamp = await stream.read('uint:24')
+            timestamp = await stream.read("uint:24")
             if timestamp >= 0xFFFFFF:
                 timestamp = 0xFFFFFF
-            msg_length = await stream.read('uint:24')
-            msg_type_id = await stream.read('uint:8')
-            msg_stream_id = await stream.read('uintle:32')
+            msg_length = await stream.read("uint:24")
+            msg_type_id = await stream.read("uint:8")
+            msg_stream_id = await stream.read("uintle:32")
             sequence = 0
         elif fmt == 1:
             # 7 bytes
             previous_chunk = self.get_previous_chunk(cs_id)
             assert previous_chunk is not None
-            delta = await stream.read('uint:24')
-            msg_length = await stream.read('uint:24')
-            msg_type_id = await stream.read('uint:8')
+            delta = await stream.read("uint:24")
+            msg_length = await stream.read("uint:24")
+            msg_type_id = await stream.read("uint:8")
             msg_stream_id = previous_chunk.msg_stream_id
             timestamp = previous_chunk.timestamp + delta
             sequence = 0 if previous_chunk.is_eof else previous_chunk.raw_chunk_number + 1
@@ -137,7 +134,7 @@ class SessionManager:
             # 3 bytes
             previous_chunk = self.get_previous_chunk(cs_id)
             assert previous_chunk is not None
-            delta = await stream.read('uint:24')
+            delta = await stream.read("uint:24")
             timestamp = previous_chunk.timestamp + delta
             msg_length = previous_chunk.msg_length
             msg_type_id = previous_chunk.msg_type_id
@@ -157,13 +154,13 @@ class SessionManager:
             raise NotImplementedError
 
         if timestamp == 0xFFFFFF:
-            timestamp = await stream.read('uint:32')
+            timestamp = await stream.read("uint:32")
 
         # determine payload size
         total_read = chunk_size * sequence
         bytes_length = min(chunk_size, msg_length - total_read)
         is_eof = (msg_length - total_read - bytes_length) == 0
-        payload = await stream.read(f'bytes:{bytes_length}')
+        payload = await stream.read(f"bytes:{bytes_length}")
         instance = RawChunk(
             chunk_type=fmt,
             chunk_id=cs_id,

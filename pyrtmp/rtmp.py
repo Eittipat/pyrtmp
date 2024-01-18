@@ -1,15 +1,17 @@
 from __future__ import annotations
+
 import abc
 import asyncio
 import logging
 from asyncio import StreamReader, StreamWriter, events
+
 from pyrtmp import StreamClosedException
 from pyrtmp.messages import Chunk
 from pyrtmp.messages.audio import AudioMessage
-from pyrtmp.messages.command import NCConnect, NCCreateStream, NSPublish, NSCloseStream, NSDeleteStream
+from pyrtmp.messages.command import NCConnect, NCCreateStream, NSCloseStream, NSDeleteStream, NSPublish
 from pyrtmp.messages.data import MetaDataMessage
 from pyrtmp.messages.factory import MessageFactory
-from pyrtmp.messages.protocol_control import WindowAcknowledgementSize, SetChunkSize, SetPeerBandwidth
+from pyrtmp.messages.protocol_control import SetChunkSize, SetPeerBandwidth, WindowAcknowledgementSize
 from pyrtmp.messages.user_control import StreamBegin
 from pyrtmp.messages.video import VideoMessage
 from pyrtmp.session_manager import SessionManager
@@ -20,7 +22,6 @@ logger.setLevel(logging.DEBUG)
 
 
 class BaseRTMPController(abc.ABC):
-
     async def client_callback(self, reader: StreamReader, writer: StreamWriter) -> None:
         raise NotImplementedError()
 
@@ -68,11 +69,10 @@ class BaseRTMPController(abc.ABC):
 
 
 class SimpleRTMPController(BaseRTMPController):
-
     async def client_callback(self, reader: StreamReader, writer: StreamWriter) -> None:
         # create session per client
         session = SessionManager(reader=reader, writer=writer)
-        logger.debug(f'Client connected {session.peername}')
+        logger.debug(f"Client connected {session.peername}")
 
         try:
             # do handshake
@@ -107,12 +107,14 @@ class SimpleRTMPController(BaseRTMPController):
                     await self.on_unknown_message(session, message)
 
         except StreamClosedException as ex:
-            logger.debug(f'Client disconnected {session.peername}')
+            logger.debug(f"Client disconnected {session.peername}")
             await self.on_stream_closed(session, ex)
         except Exception as ex:
             logger.exception(ex)
         finally:
             await self.cleanup(session)
+
+        writer.close()
 
     async def on_handshake(self, session) -> None:
         await session.handshake()
@@ -163,11 +165,10 @@ class SimpleRTMPController(BaseRTMPController):
         pass
 
     async def cleanup(self, session: SessionManager) -> None:
-        logger.debug(f'Clean up {session.peername}')
+        logger.debug(f"Clean up {session.peername}")
 
 
 class RTMPProtocol(asyncio.StreamReaderProtocol):
-
     def __init__(self, controller: BaseRTMPController) -> None:
         self.callback = controller.client_callback
         self.loop = events.get_event_loop()
@@ -179,7 +180,6 @@ class RTMPProtocol(asyncio.StreamReaderProtocol):
 
 
 class SimpleRTMPServer:
-
     def __init__(self):
         self.server = None
         self.on_start = None
@@ -205,7 +205,7 @@ class SimpleRTMPServer:
         addr = self.server.sockets[0].getsockname()
         await self.server.start_serving()
         self._signal_on_start()
-        logger.info(f'Serving on {addr}')
+        logger.info(f"Serving on {addr}")
 
     async def wait_closed(self):
         await self.server.wait_closed()
@@ -217,7 +217,7 @@ class SimpleRTMPServer:
 
 async def main():
     server = SimpleRTMPServer()
-    await server.create(host='0.0.0.0', port=1935)
+    await server.create(host="0.0.0.0", port=1935)
     await server.start()
     await server.wait_closed()
 

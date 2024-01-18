@@ -14,7 +14,8 @@ async def invoke_command(command: str):
     proc = None
     try:
         proc = await asyncio.subprocess.create_subprocess_shell(
-            command, stdout=asyncio.subprocess.PIPE,
+            command,
+            stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
         stdout, stderr = await proc.communicate()
@@ -26,7 +27,7 @@ async def invoke_command(command: str):
     finally:
         if proc and proc.returncode is None:
             process = psutil.Process(proc.pid)
-            to_be_kill = [p for p in process.children(recursive=True)]
+            to_be_kill = list(process.children(recursive=True))
             to_be_kill.append(process)
             exception = None
             for p in to_be_kill:

@@ -1,0 +1,17 @@
+name: ruff
+
+run-name: Ruff
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - run: ./ruff.sh check .

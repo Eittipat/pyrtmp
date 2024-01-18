@@ -8,7 +8,6 @@ from tests import invoke_command, remove_if_exist
 
 
 class TestFFMPEG(unittest.IsolatedAsyncioTestCase):
-
     async def asyncSetUp(self):
         _loop = asyncio.get_event_loop()
         _loop._close_loop = _loop.close
@@ -24,7 +23,7 @@ class TestFFMPEG(unittest.IsolatedAsyncioTestCase):
             remove_if_exist(target)
 
             server = SimpleServer(tempdir)
-            await server.create(host='127.0.0.1', port=1935)
+            await server.create(host="127.0.0.1", port=1935)
             await server.start()
 
             task1 = invoke_command(command.format(f"rtmp://127.0.0.1:1935/test/{stream_name}"))
@@ -45,7 +44,7 @@ class TestFFMPEG(unittest.IsolatedAsyncioTestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             # given
             server = SimpleServer(tempdir)
-            await server.create(host='127.0.0.1', port=1935)
+            await server.create(host="127.0.0.1", port=1935)
             await server.start()
 
             tasks = []

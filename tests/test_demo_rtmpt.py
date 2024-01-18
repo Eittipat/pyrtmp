@@ -8,7 +8,6 @@ from tests import invoke_command, remove_if_exist
 
 
 class TestRTMP(unittest.IsolatedAsyncioTestCase):
-
     async def test_single_rtmpt(self):
         with tempfile.TemporaryDirectory() as tempdir:
             # given
