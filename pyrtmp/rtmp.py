@@ -116,10 +116,10 @@ class SimpleRTMPController(BaseRTMPController):
 
         writer.close()
 
-    async def on_handshake(self, session) -> None:
+    async def on_handshake(self, session: SessionManager) -> None:
         await session.handshake()
 
-    async def on_nc_connect(self, session, message) -> None:
+    async def on_nc_connect(self, session: SessionManager, message: NCConnect) -> None:
         session.write_chunk_to_stream(WindowAcknowledgementSize(ack_window_size=5000000))
         session.write_chunk_to_stream(SetPeerBandwidth(ack_window_size=5000000, limit_type=2))
         session.write_chunk_to_stream(StreamBegin(stream_id=0))
@@ -128,37 +128,37 @@ class SimpleRTMPController(BaseRTMPController):
         session.write_chunk_to_stream(message.create_response())
         await session.drain()
 
-    async def on_window_acknowledgement_size(self, session, message) -> None:
+    async def on_window_acknowledgement_size(self, session: SessionManager, message: WindowAcknowledgementSize) -> None:
         pass
 
-    async def on_nc_create_stream(self, session, message) -> None:
+    async def on_nc_create_stream(self, session: SessionManager, message: NCCreateStream) -> None:
         session.write_chunk_to_stream(message.create_response())
         await session.drain()
 
-    async def on_ns_publish(self, session, message) -> None:
+    async def on_ns_publish(self, session: SessionManager, message: NSPublish) -> None:
         session.write_chunk_to_stream(StreamBegin(stream_id=1))
         session.write_chunk_to_stream(message.create_response())
         await session.drain()
 
-    async def on_metadata(self, session, message) -> None:
+    async def on_metadata(self, session: SessionManager, message: MetaDataMessage) -> None:
         pass
 
-    async def on_set_chunk_size(self, session, message) -> None:
+    async def on_set_chunk_size(self, session: SessionManager, message: SetChunkSize) -> None:
         session.reader_chunk_size = message.chunk_size
 
-    async def on_video_message(self, session, message) -> None:
+    async def on_video_message(self, session: SessionManager, message: VideoMessage) -> None:
         pass
 
-    async def on_audio_message(self, session, message) -> None:
+    async def on_audio_message(self, session: SessionManager, message: AudioMessage) -> None:
         pass
 
-    async def on_ns_close_stream(self, session, message) -> None:
+    async def on_ns_close_stream(self, session: SessionManager, message: NSCloseStream) -> None:
         pass
 
-    async def on_ns_delete_stream(self, session, message) -> None:
+    async def on_ns_delete_stream(self, session: SessionManager, message: NSDeleteStream) -> None:
         pass
 
-    async def on_unknown_message(self, session, message) -> None:
+    async def on_unknown_message(self, session: SessionManager, message: Chunk) -> None:
         logger.warning(f"Unknown message {str(message)}")
 
     async def on_stream_closed(self, session: SessionManager, exception: StreamClosedException) -> None:
@@ -180,20 +180,20 @@ class RTMPProtocol(asyncio.StreamReaderProtocol):
 
 
 class SimpleRTMPServer:
-    def __init__(self):
+    def __init__(self) -> None:
         self.server = None
         self.on_start = None
         self.on_stop = None
 
-    def _signal_on_start(self):
+    def _signal_on_start(self) -> None:
         if self.on_start:
             self.on_start()
 
-    def _signal_on_stop(self):
+    def _signal_on_stop(self) -> None:
         if self.on_stop:
             self.on_stop()
 
-    async def create(self, host: str, port: int):
+    async def create(self, host: str, port: int) -> None:
         loop = asyncio.get_event_loop()
         self.server = await loop.create_server(
             lambda: RTMPProtocol(controller=SimpleRTMPController()),
@@ -201,21 +201,21 @@ class SimpleRTMPServer:
             port=port,
         )
 
-    async def start(self):
+    async def start(self) -> None:
         addr = self.server.sockets[0].getsockname()
         await self.server.start_serving()
         self._signal_on_start()
         logger.info(f"Serving on {addr}")
 
-    async def wait_closed(self):
+    async def wait_closed(self) -> None:
         await self.server.wait_closed()
 
-    async def stop(self):
+    async def stop(self) -> None:
         self.server.close()
         self._signal_on_stop()
 
 
-async def main():
+async def main() -> None:
     server = SimpleRTMPServer()
     await server.create(host="0.0.0.0", port=1935)
     await server.start()
