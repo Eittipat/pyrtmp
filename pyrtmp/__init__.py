@@ -5,6 +5,7 @@ from io import BytesIO
 from typing import Any
 
 from bitstring import BitStream
+from bitstring.bits import Bits
 from bitstring.utils import tokenparser
 
 
@@ -23,7 +24,7 @@ class BitStreamReader:
         self.total_bytes = 0
         super().__init__()
 
-    async def read(self, fmt):
+    async def read(self, fmt) -> int | float | str | Bits | bool | bytes | None:
         _, token = tokenparser(fmt)
         assert len(token) == 1
         name, length, _ = token[0]

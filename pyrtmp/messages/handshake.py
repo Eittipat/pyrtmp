@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from bitstring import BitArray, BitStream
 
 from pyrtmp import BitStreamReader
@@ -9,11 +11,11 @@ class C0:
         super().__init__()
 
     @classmethod
-    async def from_stream(cls, stream: BitStreamReader):
+    async def from_stream(cls, stream: BitStreamReader) -> C0:
         protocol_version = await stream.read("uint:8")
         return cls(protocol_version=protocol_version)
 
-    def to_bytes(self):
+    def to_bytes(self) -> bytes:
         stream = BitStream()
         stream.append(BitArray(uint=self.protocol_version, length=8))
         return stream.bytes
@@ -27,13 +29,13 @@ class C1:
         super().__init__()
 
     @classmethod
-    async def from_stream(cls, stream: BitStreamReader):
+    async def from_stream(cls, stream: BitStreamReader) -> C1:
         time = await stream.read("uint:32")
         zero = await stream.read("uint:32")
         rand = await stream.read("bytes:1528")
         return cls(time=time, zero=zero, random=rand)
 
-    def to_bytes(self):
+    def to_bytes(self) -> bytes:
         stream = BitStream()
         stream.append(BitArray(uint=self.time, length=32))
         stream.append(BitArray(uint=self.zero, length=32))
@@ -49,13 +51,13 @@ class C2:
         super().__init__()
 
     @classmethod
-    async def from_stream(cls, stream: BitStreamReader):
+    async def from_stream(cls, stream: BitStreamReader) -> C2:
         time1 = await stream.read("uint:32")
         time2 = await stream.read("uint:32")
         rand = await stream.read("bytes:1528")
         return cls(time1=time1, time2=time2, random=rand)
 
-    def to_bytes(self):
+    def to_bytes(self) -> bytes:
         stream = BitStream()
         stream.append(BitArray(uint=self.time1, length=32))
         stream.append(BitArray(uint=self.time2, length=32))

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from asyncio import StreamReader, StreamWriter
 from collections.abc import Generator
 
 from bitstring import BitStream
@@ -10,7 +11,9 @@ from pyrtmp.messages.handshake import C0, C1, C2
 
 
 class SessionManager:
-    def __init__(self, reader, writer, reader_chunk_size=128, writer_chunk_size=128) -> None:
+    def __init__(
+        self, reader: StreamReader, writer: StreamWriter, reader_chunk_size: int = 128, writer_chunk_size: int = 128
+    ) -> None:
         self.reader = reader
         self.writer = writer
         self.reader_chunk_size = reader_chunk_size
@@ -22,22 +25,22 @@ class SessionManager:
         super().__init__()
 
     @property
-    def total_read_bytes(self):
+    def total_read_bytes(self) -> int:
         return self.fifo_reader.total_bytes
 
     @property
-    def peername(self):
+    def peername(self) -> str:
         a, b = self.writer.get_extra_info("peername")
         return f"{a}:{b}"
 
-    def set_latest_chunk(self, chunk: RawChunk):
+    def set_latest_chunk(self, chunk: RawChunk) -> None:
         self.latest_chunks[str(chunk.chunk_id)] = chunk
         self.latest_chunks["latest"] = chunk
 
     def get_previous_chunk(self, chunk_id: int) -> RawChunk:
         return self.latest_chunks[str(chunk_id)]
 
-    async def handshake(self):
+    async def handshake(self) -> None:
         # read c0c1
         c0 = await C0.from_stream(self.fifo_reader)
         c1 = await C1.from_stream(self.fifo_reader)
@@ -179,12 +182,12 @@ class SessionManager:
         # return
         return instance
 
-    def write_chunk_to_stream(self, chunk: Chunk):
+    def write_chunk_to_stream(self, chunk: Chunk) -> None:
         chunks = chunk.to_raw_chunks(self.writer_chunk_size, self.previous_chunk_for_writing)
         for chunk in chunks:
             self.writer.write(chunk.to_bytes())
             self.previous_chunk_for_writing = chunk
 
-    async def drain(self):
+    async def drain(self) -> None:
         self.previous_chunk_for_writing = None
         await self.writer.drain()
