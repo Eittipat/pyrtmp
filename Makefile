@@ -1,7 +1,7 @@
 
 install:
-	@pip install -r requirements.txt
-	@pip install -r requirements-dev.txt
+	@pip install -r requirements.lock
+	@pip install -r requirements-dev.lock
 
 ruff:
 	@ruff --fix .
