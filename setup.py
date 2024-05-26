@@ -5,7 +5,7 @@ from setuptools import find_packages
 setup(
     name="pyrtmp",
     packages=find_packages(),
-    version="0.3.0",
+    version="0.3.1",
     license="MIT",
     description="PyRTMP: Pure Python RTMP server",
     author="Eittipat.K",
