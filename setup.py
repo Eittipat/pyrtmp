@@ -14,7 +14,7 @@ setup(
     download_url="https://github.com/Eittipat/pyrtmp/releases/tag/v0.3.0",
     keywords=["RTMP", "RTMPT", "asyncio"],
     python_requires=">=3.10",
-    install_requires=["bitstring>=4"],
+    install_requires=["bitstring>=4.1,<4.2"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
