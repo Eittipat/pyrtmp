@@ -8,6 +8,7 @@ from bitstring import BitStream
 from pyrtmp import BitStreamReader, random_byte_array
 from pyrtmp.messages import Chunk, RawChunk
 from pyrtmp.messages.handshake import C0, C1, C2
+from pyrtmp.utils import net_addr_to_string
 
 
 class SessionManager:
@@ -30,8 +31,8 @@ class SessionManager:
 
     @property
     def peername(self) -> str:
-        a, b = self.writer.get_extra_info("peername")
-        return f"{a}:{b}"
+        s = self.writer.get_extra_info("socket")
+        return net_addr_to_string(s.family, s.getpeername())
 
     def set_latest_chunk(self, chunk: RawChunk) -> None:
         self.latest_chunks[str(chunk.chunk_id)] = chunk
