@@ -16,7 +16,6 @@ from pyrtmp.messages.user_control import StreamBegin
 from pyrtmp.messages.video import VideoMessage
 from pyrtmp.session_manager import SessionManager
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -223,4 +222,5 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     asyncio.run(main())
