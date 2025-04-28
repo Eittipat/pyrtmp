@@ -15,6 +15,7 @@ from pyrtmp.messages.protocol_control import SetChunkSize, SetPeerBandwidth, Win
 from pyrtmp.messages.user_control import StreamBegin
 from pyrtmp.messages.video import VideoMessage
 from pyrtmp.session_manager import SessionManager
+from pyrtmp.utils import net_addr_to_string
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -201,10 +202,11 @@ class SimpleRTMPServer:
         )
 
     async def start(self) -> None:
+        addrs = ', '.join(net_addr_to_string(sock.family, sock.getsockname()) for sock in self.server.sockets)
         addr = self.server.sockets[0].getsockname()
         await self.server.start_serving()
         self._signal_on_start()
-        logger.info(f"Serving on {addr}")
+        logger.info(f"Serving on {addrs}")
 
     async def wait_closed(self) -> None:
         await self.server.wait_closed()
